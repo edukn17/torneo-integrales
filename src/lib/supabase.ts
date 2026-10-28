@@ -3,8 +3,11 @@ import { Integral, UserProfile, UserRole, ROLE_HIERARCHY } from '../types';
 import { INITIAL_INTEGRALS } from './mockData';
 
 // Configuración de Supabase
-const ENV_SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
-const ENV_SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const DEFAULT_SUPABASE_URL = 'https://vxjgrtqznqbpkfjjpsed.supabase.co';
+const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4amdydHF6bnFicGtmampwc2VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyMTIwMjksImV4cCI6MjEwODc4ODAyOX0.lfshQkBBcypGcQvLVpQqDkGMw-NSzpV4Gsqy7ZrrPPA';
+
+const ENV_SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL;
+const ENV_SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY;
 
 // Permitir guardar en localStorage para configurar desde la interfaz sin redeploy
 const STORAGE_KEY_URL = 'torneo_supabase_url';
