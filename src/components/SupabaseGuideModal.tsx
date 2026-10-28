@@ -140,7 +140,7 @@ CREATE POLICY "Colaboradores pueden registrar integrales"
 CREATE POLICY "Admins pueden eliminar integrales"
   ON public.integrales FOR DELETE TO authenticated
   USING (public.current_user_role() = 'admin');
-\`;
+`;
     navigator.clipboard.writeText(sqlText);
     setCopiedSql(true);
     setTimeout(() => setCopiedSql(false), 2000);
