@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { Integral, UserProfile, UserRole } from './types';
 import { IntegralService, AuthService } from './lib/supabase';
 import { Navbar } from './components/Navbar';
+import { LandingHero } from './components/LandingHero';
 import { IntegralList } from './components/IntegralList';
 import { IntegralEditor } from './components/IntegralEditor';
-import { ProjectorMode } from './components/ProjectorMode';
 import { UserManagement } from './components/UserManagement';
 import { AuthModal } from './components/AuthModal';
 import { SupabaseGuideModal } from './components/SupabaseGuideModal';
@@ -12,13 +12,14 @@ import confetti from 'canvas-confetti';
 import { Calendar, Award, Building2 } from 'lucide-react';
 
 export function App() {
-  const [user, setUser] = useState<UserProfile>(() => AuthService.getStoredProfile());
+  const [user, setUser] = useState<UserProfile | null>(() => AuthService.getStoredProfile());
   const [integrals, setIntegrals] = useState<Integral[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [currentTab, setCurrentTab] = useState<'list' | 'editor' | 'projector' | 'users'>('list');
+  const [loading, setLoading] = useState(false);
+  const [currentTab, setCurrentTab] = useState<'list' | 'editor' | 'users'>('list');
   const [editingIntegral, setEditingIntegral] = useState<Integral | null>(null);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [authTab, setAuthTab] = useState<'login' | 'register'>('login');
   const [isSupabaseConnected, setIsSupabaseConnected] = useState(false);
 
   // Cargar integrales según rol
@@ -40,32 +41,28 @@ export function App() {
       setIsSupabaseConnected(IntegralService.isSupabaseConfigured());
       const currentUser = await AuthService.getCurrentUser();
       setUser(currentUser);
-      loadIntegrals(currentUser.role);
+      if (currentUser) {
+        loadIntegrals(currentUser.role);
+      }
     };
     init();
   }, [loadIntegrals]);
 
-  const handleRoleChange = (newRole: UserRole) => {
-    const updatedUser = { ...user, role: newRole };
-    setUser(updatedUser);
-    AuthService.setStoredProfile(updatedUser);
-    loadIntegrals(newRole);
-  };
-
   const handleAuthSuccess = (loggedUser: UserProfile) => {
     setUser(loggedUser);
     loadIntegrals(loggedUser.role);
+    setCurrentTab('list');
   };
 
   const handleSignOut = async () => {
     await AuthService.signOut();
-    const guestUser = AuthService.getStoredProfile();
-    setUser(guestUser);
-    loadIntegrals(guestUser.role);
+    setUser(null);
+    setIntegrals([]);
     setCurrentTab('list');
   };
 
   const handleSaveIntegral = async (data: Omit<Integral, 'id' | 'created_at'>) => {
+    if (!user) return;
     if (editingIntegral) {
       await IntegralService.updateIntegral(editingIntegral.id, data);
     } else {
@@ -82,6 +79,7 @@ export function App() {
   };
 
   const handleDeleteIntegral = async (id: string) => {
+    if (!user) return;
     if (window.confirm('¿Seguro que deseas eliminar este ejercicio del banco del torneo?')) {
       await IntegralService.deleteIntegral(id);
       await loadIntegrals(user.role);
@@ -103,9 +101,15 @@ export function App() {
           setCurrentTab(tab);
         }}
         user={user}
-        onChangeRole={handleRoleChange}
         onOpenConfig={() => setIsConfigOpen(true)}
-        onOpenAuth={() => setIsAuthOpen(true)}
+        onOpenLogin={() => {
+          setAuthTab('login');
+          setIsAuthOpen(true);
+        }}
+        onOpenRegister={() => {
+          setAuthTab('register');
+          setIsAuthOpen(true);
+        }}
         onSignOut={handleSignOut}
         isSupabaseConnected={isSupabaseConnected}
         totalIntegralsCount={integrals.length}
@@ -113,49 +117,59 @@ export function App() {
 
       {/* Contenido Principal */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fadeIn">
-        {currentTab === 'list' && (
-          <div>
-            {loading ? (
-              <div className="flex flex-col items-center justify-center min-h-[300px]">
-                <div className="w-10 h-10 border-4 border-fcnm border-t-transparent rounded-full animate-spin mb-3" />
-                <p className="text-sm font-semibold text-slate-500">Cargando banco de integrales...</p>
+        {/* Si el usuario no ha iniciado sesión, mostrar la página de bienvenida y registro */}
+        {!user ? (
+          <LandingHero
+            onOpenLogin={() => {
+              setAuthTab('login');
+              setIsAuthOpen(true);
+            }}
+            onOpenRegister={() => {
+              setAuthTab('register');
+              setIsAuthOpen(true);
+            }}
+          />
+        ) : (
+          /* Si ha iniciado sesión, mostrar su espacio de trabajo según su rol */
+          <>
+            {currentTab === 'list' && (
+              <div>
+                {loading ? (
+                  <div className="flex flex-col items-center justify-center min-h-[300px]">
+                    <div className="w-10 h-10 border-4 border-fcnm border-t-transparent rounded-full animate-spin mb-3" />
+                    <p className="text-sm font-semibold text-slate-500">Cargando banco de integrales...</p>
+                  </div>
+                ) : (
+                  <IntegralList
+                    integrals={integrals}
+                    userRole={user.role}
+                    onEdit={handleEditIntegral}
+                    onDelete={handleDeleteIntegral}
+                    onAddNew={() => {
+                      setEditingIntegral(null);
+                      setCurrentTab('editor');
+                    }}
+                  />
+                )}
               </div>
-            ) : (
-              <IntegralList
-                integrals={integrals}
+            )}
+
+            {currentTab === 'editor' && (
+              <IntegralEditor
+                initialIntegral={editingIntegral}
                 userRole={user.role}
-                onEdit={handleEditIntegral}
-                onDelete={handleDeleteIntegral}
-                onAddNew={() => {
+                onSave={handleSaveIntegral}
+                onCancel={() => {
                   setEditingIntegral(null);
-                  setCurrentTab('editor');
+                  setCurrentTab('list');
                 }}
               />
             )}
-          </div>
-        )}
 
-        {currentTab === 'editor' && (
-          <IntegralEditor
-            initialIntegral={editingIntegral}
-            userRole={user.role}
-            onSave={handleSaveIntegral}
-            onCancel={() => {
-              setEditingIntegral(null);
-              setCurrentTab('list');
-            }}
-          />
-        )}
-
-        {currentTab === 'users' && user.role === 'admin' && (
-          <UserManagement currentUser={user} />
-        )}
-
-        {currentTab === 'projector' && (
-          <ProjectorMode
-            integrals={integrals}
-            onExit={() => setCurrentTab('list')}
-          />
+            {currentTab === 'users' && user.role === 'admin' && (
+              <UserManagement currentUser={user} />
+            )}
+          </>
         )}
       </main>
 
@@ -187,6 +201,7 @@ export function App() {
       {/* Modal Autenticación */}
       <AuthModal
         isOpen={isAuthOpen}
+        initialTab={authTab}
         onClose={() => setIsAuthOpen(false)}
         onAuthSuccess={handleAuthSuccess}
       />
@@ -197,7 +212,9 @@ export function App() {
         onClose={() => setIsConfigOpen(false)}
         onCredentialsUpdated={() => {
           setIsSupabaseConnected(IntegralService.isSupabaseConfigured());
-          loadIntegrals(user.role);
+          if (user) {
+            loadIntegrals(user.role);
+          }
         }}
       />
     </div>

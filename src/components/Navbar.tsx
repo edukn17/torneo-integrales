@@ -1,9 +1,7 @@
 import React from 'react';
-import { UserProfile, UserRole } from '../types';
+import { UserProfile } from '../types';
 import {
   Database,
-  Shield,
-  MonitorPlay,
   PlusCircle,
   BookOpen,
   SlidersHorizontal,
@@ -13,12 +11,12 @@ import {
 } from 'lucide-react';
 
 interface NavbarProps {
-  currentTab: 'list' | 'editor' | 'projector' | 'users';
-  onSelectTab: (tab: 'list' | 'editor' | 'projector' | 'users') => void;
-  user: UserProfile;
-  onChangeRole: (role: UserRole) => void;
+  currentTab: 'list' | 'editor' | 'users';
+  onSelectTab: (tab: 'list' | 'editor' | 'users') => void;
+  user: UserProfile | null;
   onOpenConfig: () => void;
-  onOpenAuth: () => void;
+  onOpenLogin: () => void;
+  onOpenRegister: () => void;
   onSignOut: () => void;
   isSupabaseConnected: boolean;
   totalIntegralsCount: number;
@@ -28,9 +26,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   currentTab,
   onSelectTab,
   user,
-  onChangeRole,
   onOpenConfig,
-  onOpenAuth,
+  onOpenLogin,
+  onOpenRegister,
   onSignOut,
   isSupabaseConnected,
   totalIntegralsCount,
@@ -79,118 +77,122 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </span>
               </div>
               <p className="text-xs text-slate-500 font-medium">
-                Plataforma de Curaduría y Banco de Problemas
+                Portal de Curación y Banco de Ejercicios
               </p>
             </div>
           </div>
 
-          {/* Botones de Navegación Centrales */}
-          <nav className="flex items-center gap-1.5 sm:gap-2">
-            <button
-              onClick={() => onSelectTab('list')}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-200 ${
-                currentTab === 'list'
-                  ? 'bg-fcnm text-white shadow-md shadow-fcnm/30 translate-y-[-1px]'
-                  : 'text-slate-600 hover:text-fcnm hover:bg-purple-50'
-              }`}
-            >
-              <BookOpen className="w-4 h-4" />
-              <span>Banco</span>
-              <span
-                className={`text-xs px-2 py-0.5 rounded-full font-bold ${
-                  currentTab === 'list'
-                    ? 'bg-white/20 text-white'
-                    : 'bg-purple-100 text-fcnm'
-                }`}
-              >
-                {totalIntegralsCount}
-              </span>
-            </button>
-
-            <button
-              onClick={() => onSelectTab('editor')}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-200 ${
-                currentTab === 'editor'
-                  ? 'bg-fcnm text-white shadow-md shadow-fcnm/30 translate-y-[-1px]'
-                  : 'text-slate-600 hover:text-fcnm hover:bg-purple-50'
-              }`}
-            >
-              <PlusCircle className="w-4 h-4" />
-              <span className="hidden sm:inline">Subir Integral</span>
-            </button>
-
-            {/* Pestaña de Gestión de Usuarios exclusiva para Admin */}
-            {user.role === 'admin' && (
-              <button
-                onClick={() => onSelectTab('users')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-200 ${
-                  currentTab === 'users'
-                    ? 'bg-fcnm text-white shadow-md shadow-fcnm/30 translate-y-[-1px]'
-                    : 'text-slate-600 hover:text-fcnm hover:bg-purple-50'
-                }`}
-                title="Administrar roles de colaboradores"
-              >
-                <Users className="w-4 h-4" />
-                <span className="hidden sm:inline">Colaboradores</span>
-              </button>
-            )}
-
-            <button
-              onClick={() => onSelectTab('projector')}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-200 ${
-                currentTab === 'projector'
-                  ? 'bg-fcnm-dark text-white shadow-md shadow-fcnm-dark/40 translate-y-[-1px]'
-                  : 'text-slate-600 hover:text-fcnm hover:bg-purple-50'
-              }`}
-            >
-              <MonitorPlay className="w-4 h-4 text-espol-gold" />
-              <span className="hidden sm:inline">Modo Proyector</span>
-            </button>
-          </nav>
-
-          {/* Usuario y Selector de Rol */}
-          <div className="flex items-center gap-2">
-            {/* Rol de Acceso */}
-            <div className="flex items-center bg-purple-50/70 border border-purple-200/80 rounded-xl px-2.5 py-1.5 shadow-sm">
-              <Shield className="w-4 h-4 text-fcnm mr-1.5" />
-              <div className="flex flex-col text-left">
-                <span className="text-[10px] uppercase font-bold text-fcnm-deep leading-none">
-                  Rol:
-                </span>
-                <select
-                  aria-label="Seleccionar rol de colaborador"
-                  value={user.role}
-                  onChange={(e) => onChangeRole(e.target.value as UserRole)}
-                  className="bg-transparent text-xs font-bold text-fcnm-dark focus:outline-none cursor-pointer pr-1 leading-tight mt-0.5"
+          {/* Si el usuario ha iniciado sesión: Mostrar pestañas de trabajo */}
+          {user ? (
+            <div className="flex items-center gap-3">
+              {/* Botones de Navegación Centrales */}
+              <nav className="flex items-center gap-1.5 sm:gap-2">
+                <button
+                  onClick={() => onSelectTab('list')}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-200 ${
+                    currentTab === 'list'
+                      ? 'bg-fcnm text-white shadow-md shadow-fcnm/30 translate-y-[-1px]'
+                      : 'text-slate-600 hover:text-fcnm hover:bg-purple-50'
+                  }`}
                 >
-                  <option value="admin">Admin (Todo)</option>
-                  <option value="dificil">Nivel Difícil (D + M + B)</option>
-                  <option value="medio">Nivel Medio (M + B)</option>
-                  <option value="basico">Nivel Básico (Solo B)</option>
-                </select>
+                  <BookOpen className="w-4 h-4" />
+                  <span>Banco</span>
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full font-bold ${
+                      currentTab === 'list'
+                        ? 'bg-white/20 text-white'
+                        : 'bg-purple-100 text-fcnm'
+                    }`}
+                  >
+                    {totalIntegralsCount}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => onSelectTab('editor')}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-200 ${
+                    currentTab === 'editor'
+                      ? 'bg-fcnm text-white shadow-md shadow-fcnm/30 translate-y-[-1px]'
+                      : 'text-slate-600 hover:text-fcnm hover:bg-purple-50'
+                  }`}
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  <span className="hidden sm:inline">Subir Integral</span>
+                </button>
+
+                {/* Pestaña de Gestión de Colaboradores exclusiva para Admin */}
+                {user.role === 'admin' && (
+                  <button
+                    onClick={() => onSelectTab('users')}
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-200 ${
+                      currentTab === 'users'
+                        ? 'bg-fcnm text-white shadow-md shadow-fcnm/30 translate-y-[-1px]'
+                        : 'text-slate-600 hover:text-fcnm hover:bg-purple-50'
+                    }`}
+                    title="Administrar roles de colaboradores"
+                  >
+                    <Users className="w-4 h-4" />
+                    <span className="hidden sm:inline">Colaboradores</span>
+                  </button>
+                )}
+              </nav>
+
+              {/* Carnet de Usuario y Rol */}
+              <div className="flex items-center gap-2 pl-2 border-l border-purple-100">
+                <div className="flex flex-col text-right hidden md:block">
+                  <span className="text-xs font-bold text-slate-800 leading-tight">
+                    {user.full_name || user.email}
+                  </span>
+                  <div className="flex items-center justify-end gap-1.5 mt-0.5">
+                    {user.matricula && (
+                      <span className="text-[10px] font-mono text-purple-600 font-bold bg-purple-50 px-1.5 py-0.2 rounded border border-purple-200">
+                        {user.matricula}
+                      </span>
+                    )}
+                    <span
+                      className={`text-[10px] font-bold uppercase px-2 py-0.2 rounded-full border ${
+                        user.role === 'admin'
+                          ? 'bg-purple-100 text-purple-900 border-purple-300'
+                          : user.role === 'dificil'
+                          ? 'bg-fcnm-light text-fcnm border-fcnm-border'
+                          : user.role === 'medio'
+                          ? 'bg-amber-50 text-amber-800 border-amber-200'
+                          : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                      }`}
+                    >
+                      {user.role === 'admin' ? 'Admin' : `Nivel ${user.role}`}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={onSignOut}
+                  className="flex items-center gap-1.5 p-2 rounded-xl text-xs font-bold text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                  title="Cerrar sesión"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
               </div>
             </div>
-
-            {/* Iniciar Sesión / Cuenta */}
-            {user.is_demo ? (
+          ) : (
+            /* Si no ha iniciado sesión: Mostrar botones de Acceso */
+            <div className="flex items-center gap-2.5">
               <button
-                onClick={onOpenAuth}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-fcnm text-white hover:bg-fcnm-hover shadow-sm transition-all"
-                title="Iniciar sesión o registrarse con Supabase"
+                onClick={onOpenLogin}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-fcnm hover:bg-purple-50 transition-colors"
               >
                 <LogIn className="w-3.5 h-3.5" />
-                <span className="hidden md:inline">Iniciar Sesión</span>
+                <span>Iniciar Sesión</span>
               </button>
-            ) : (
+
               <button
-                onClick={onSignOut}
-                className="flex items-center gap-1.5 p-2 rounded-xl text-xs font-bold text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                title={`Cerrar sesión (${user.email})`}
+                onClick={onOpenRegister}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-fcnm hover:bg-fcnm-hover text-white shadow-sm transition-all"
               >
-                <LogOut className="w-4 h-4" />
+                <span>Registrarme</span>
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </header>

@@ -226,23 +226,25 @@ const INITIAL_MOCK_PROFILES: UserProfile[] = [
 ];
 
 export const AuthService = {
-  getStoredProfile(): UserProfile {
+  getStoredProfile(): UserProfile | null {
     try {
       const raw = localStorage.getItem(STORAGE_KEY_USER_PROFILE);
       if (raw) return JSON.parse(raw);
     } catch (e) {
       console.error(e);
     }
-    const defaultProfile: UserProfile = INITIAL_MOCK_PROFILES[0];
-    localStorage.setItem(STORAGE_KEY_USER_PROFILE, JSON.stringify(defaultProfile));
-    return defaultProfile;
+    return null;
   },
 
-  setStoredProfile(profile: UserProfile): void {
-    localStorage.setItem(STORAGE_KEY_USER_PROFILE, JSON.stringify(profile));
+  setStoredProfile(profile: UserProfile | null): void {
+    if (profile) {
+      localStorage.setItem(STORAGE_KEY_USER_PROFILE, JSON.stringify(profile));
+    } else {
+      localStorage.removeItem(STORAGE_KEY_USER_PROFILE);
+    }
   },
 
-  async getCurrentUser(): Promise<UserProfile> {
+  async getCurrentUser(): Promise<UserProfile | null> {
     const client = getSupabaseClient();
     if (!client) {
       return this.getStoredProfile();
@@ -251,7 +253,7 @@ export const AuthService = {
     try {
       const { data: { session } } = await client.auth.getSession();
       if (!session?.user) {
-        return this.getStoredProfile();
+        return null;
       }
 
       const { data: profile } = await client
@@ -277,7 +279,7 @@ export const AuthService = {
       console.warn('Error obteniendo sesión de Supabase:', e);
     }
 
-    return this.getStoredProfile();
+    return null;
   },
 
   async signUp(email: string, password: string, fullName: string, matricula: string): Promise<{ user: UserProfile | null; error: string | null }> {

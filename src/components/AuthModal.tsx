@@ -5,12 +5,26 @@ import { X, LogIn, UserPlus, Lock, Mail, User, AlertCircle, CheckCircle2, Hash }
 
 interface AuthModalProps {
   isOpen: boolean;
+  initialTab?: 'login' | 'register';
   onClose: () => void;
   onAuthSuccess: (user: UserProfile) => void;
 }
 
-export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onAuthSuccess }) => {
-  const [tab, setTab] = useState<'login' | 'register'>('login');
+export const AuthModal: React.FC<AuthModalProps> = ({
+  isOpen,
+  initialTab = 'login',
+  onClose,
+  onAuthSuccess,
+}) => {
+  const [tab, setTab] = useState<'login' | 'register'>(initialTab);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setTab(initialTab);
+      setErrorMsg('');
+      setSuccessMsg('');
+    }
+  }, [isOpen, initialTab]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
