@@ -2,10 +2,6 @@ import React from 'react';
 import {
   LogIn,
   UserPlus,
-  BookOpen,
-  Award,
-  Calendar,
-  Building2,
   CheckCircle2,
   ShieldCheck,
   GraduationCap,
