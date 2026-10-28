@@ -30,6 +30,7 @@ export interface UserProfile {
   email: string;
   full_name: string;
   role: UserRole;
+  created_at?: string;
   is_demo?: boolean;
 }
 
@@ -57,7 +58,7 @@ export const LEVEL_LABELS: Record<DifficultyLevel, { label: string; color: strin
   dificil: {
     label: 'Difícil',
     color: 'rose',
-    badge: 'bg-rose-50 text-rose-700 border-rose-200 font-semibold',
+    badge: 'bg-purple-50 text-fcnm-deep border-purple-200 font-semibold',
     phase: 'Fase 3: Semis y Final',
   },
 };

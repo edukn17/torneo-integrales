@@ -7,14 +7,19 @@ import {
   PlusCircle,
   BookOpen,
   SlidersHorizontal,
+  Users,
+  LogOut,
+  LogIn,
 } from 'lucide-react';
 
 interface NavbarProps {
-  currentTab: 'list' | 'editor' | 'projector';
-  onSelectTab: (tab: 'list' | 'editor' | 'projector') => void;
+  currentTab: 'list' | 'editor' | 'projector' | 'users';
+  onSelectTab: (tab: 'list' | 'editor' | 'projector' | 'users') => void;
   user: UserProfile;
   onChangeRole: (role: UserRole) => void;
   onOpenConfig: () => void;
+  onOpenAuth: () => void;
+  onSignOut: () => void;
   isSupabaseConnected: boolean;
   totalIntegralsCount: number;
 }
@@ -25,6 +30,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   user,
   onChangeRole,
   onOpenConfig,
+  onOpenAuth,
+  onSignOut,
   isSupabaseConnected,
   totalIntegralsCount,
 }) => {
@@ -112,6 +119,22 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="hidden sm:inline">Subir Integral</span>
             </button>
 
+            {/* Pestaña de Gestión de Usuarios exclusiva para Admin */}
+            {user.role === 'admin' && (
+              <button
+                onClick={() => onSelectTab('users')}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-200 ${
+                  currentTab === 'users'
+                    ? 'bg-fcnm text-white shadow-md shadow-fcnm/30 translate-y-[-1px]'
+                    : 'text-slate-600 hover:text-fcnm hover:bg-purple-50'
+                }`}
+                title="Administrar roles de colaboradores"
+              >
+                <Users className="w-4 h-4" />
+                <span className="hidden sm:inline">Colaboradores</span>
+              </button>
+            )}
+
             <button
               onClick={() => onSelectTab('projector')}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-200 ${
@@ -125,13 +148,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           </nav>
 
-          {/* Selector de Rol de Colaborador */}
+          {/* Usuario y Selector de Rol */}
           <div className="flex items-center gap-2">
-            <div className="flex items-center bg-purple-50/70 border border-purple-200/80 rounded-xl px-3 py-1.5 shadow-sm">
+            {/* Rol de Acceso */}
+            <div className="flex items-center bg-purple-50/70 border border-purple-200/80 rounded-xl px-2.5 py-1.5 shadow-sm">
               <Shield className="w-4 h-4 text-fcnm mr-1.5" />
               <div className="flex flex-col text-left">
                 <span className="text-[10px] uppercase font-bold text-fcnm-deep leading-none">
-                  Rol Activo:
+                  Rol:
                 </span>
                 <select
                   aria-label="Seleccionar rol de colaborador"
@@ -139,13 +163,33 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onChange={(e) => onChangeRole(e.target.value as UserRole)}
                   className="bg-transparent text-xs font-bold text-fcnm-dark focus:outline-none cursor-pointer pr-1 leading-tight mt-0.5"
                 >
-                  <option value="admin">Administrador (Todo)</option>
+                  <option value="admin">Admin (Todo)</option>
                   <option value="dificil">Nivel Difícil (D + M + B)</option>
                   <option value="medio">Nivel Medio (M + B)</option>
                   <option value="basico">Nivel Básico (Solo B)</option>
                 </select>
               </div>
             </div>
+
+            {/* Iniciar Sesión / Cuenta */}
+            {user.is_demo ? (
+              <button
+                onClick={onOpenAuth}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-fcnm text-white hover:bg-fcnm-hover shadow-sm transition-all"
+                title="Iniciar sesión o registrarse con Supabase"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span className="hidden md:inline">Iniciar Sesión</span>
+              </button>
+            ) : (
+              <button
+                onClick={onSignOut}
+                className="flex items-center gap-1.5 p-2 rounded-xl text-xs font-bold text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                title={`Cerrar sesión (${user.email})`}
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
       </div>

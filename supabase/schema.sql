@@ -1,12 +1,11 @@
 -- ==============================================================================
--- TORNEO DE INTEGRALES - CLUB MATES / AEFIEC / IEEE-HKN
+-- TORNEO DE INTEGRALES - CLUB MATES / AEFIEC / IEEE-HKN (FCNM ESPOL)
 -- Esquema de Base de Datos y Políticas de Seguridad (Supabase PostgreSQL + RLS)
 -- ==============================================================================
 
--- 1. EXTENSIONES
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- 2. TABLA DE PERFILES (Vinculada a auth.users de Supabase)
+-- 1. TABLA DE PERFILES (Vinculada a auth.users de Supabase)
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT NOT NULL,
@@ -16,21 +15,24 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- Habilitar RLS en profiles
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
--- Políticas de profiles
-CREATE POLICY "Los usuarios pueden ver su propio perfil y perfiles públicos"
+CREATE POLICY "Los usuarios pueden ver su propio perfil y perfiles publicos"
   ON public.profiles FOR SELECT
   TO authenticated
   USING (true);
 
-CREATE POLICY "Los usuarios pueden actualizar su propio perfil"
+-- Política para que los usuarios editen su perfil y los admins gestionen roles
+DROP POLICY IF EXISTS "Los usuarios pueden actualizar su propio perfil" ON public.profiles;
+DROP POLICY IF EXISTS "Admins y usuarios pueden actualizar perfiles" ON public.profiles;
+CREATE POLICY "Admins y usuarios pueden actualizar perfiles"
   ON public.profiles FOR UPDATE
   TO authenticated
-  USING (auth.uid() = id);
+  USING (
+    auth.uid() = id OR 
+    (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
+  );
 
--- Trigger para crear perfil automáticamente al registrarse en auth.users
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -50,13 +52,12 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- Función auxiliar para obtener el rol del usuario autenticado
 CREATE OR REPLACE FUNCTION public.current_user_role()
 RETURNS TEXT AS $$
   SELECT role FROM public.profiles WHERE id = auth.uid();
 $$ LANGUAGE sql STABLE SECURITY DEFINER;
 
--- 3. TABLA DE INTEGRALES (Banco de Ejercicios)
+-- 2. TABLA DE INTEGRALES (Banco de Ejercicios)
 CREATE TABLE IF NOT EXISTS public.integrales (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
@@ -68,7 +69,7 @@ CREATE TABLE IF NOT EXISTS public.integrales (
   tags TEXT[] DEFAULT '{}',
   source_reference TEXT DEFAULT '',
   notes TEXT DEFAULT '',
-  time_limit_seconds INT NOT NULL DEFAULT 600, -- 600s = 10 min (Fase 2), 300s = 5 min (Fase 3)
+  time_limit_seconds INT NOT NULL DEFAULT 600,
   status TEXT NOT NULL CHECK (status IN ('propuesta', 'revisada', 'aprobada', 'rechazada')) DEFAULT 'propuesta',
   created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
   created_by_name TEXT DEFAULT '',
@@ -76,15 +77,9 @@ CREATE TABLE IF NOT EXISTS public.integrales (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- Habilitar RLS en integrales
 ALTER TABLE public.integrales ENABLE ROW LEVEL SECURITY;
 
--- 4. POLÍTICAS DE ACCESO JERÁRQUICO (RBAC estricto en BD)
--- Básico: Solo ve 'basico'
--- Medio: Ve 'basico' y 'medio'
--- Difícil: Ve 'basico', 'medio' y 'dificil'
--- Admin: Ve todo y gestiona todo
-
+-- 3. POLÍTICAS DE ACCESO JERÁRQUICO
 CREATE POLICY "Lectura jerarquica de integrales segun rol del colaborador"
   ON public.integrales FOR SELECT
   TO authenticated
@@ -118,20 +113,10 @@ CREATE POLICY "Admins pueden eliminar integrales"
   TO authenticated
   USING (public.current_user_role() = 'admin');
 
--- 5. SEMILLAS DE PRUEBA (Ejercicios iniciales basados en la propuesta)
+-- 4. EJERCICIOS INICIALES DEL TORNEO
 INSERT INTO public.integrales (
-  title,
-  latex_code,
-  difficulty_level,
-  phase,
-  solution_latex,
-  alternative_solutions,
-  tags,
-  source_reference,
-  notes,
-  time_limit_seconds,
-  status,
-  created_by_name
+  title, latex_code, difficulty_level, phase, solution_latex,
+  alternative_solutions, tags, source_reference, notes, time_limit_seconds, status, created_by_name
 ) VALUES 
 (
   'Integral racional con logaritmo y fracciones parciales',
@@ -142,10 +127,10 @@ INSERT INTO public.integrales (
   ARRAY['\\ln|x| + \\ln|x+2| + C', '\\ln|x(x+2)| + C'],
   ARRAY['sustitución', 'fracciones parciales', 'logaritmo'],
   'Propuesta Oficial MatEs - Ejemplo 1',
-  'Aceptar tanto la forma por sustitución u=x^2+2x como la descomposición en fracciones simples 1/x + 1/(x+2).',
+  'Aceptar sustitución u=x^2+2x o fracciones parciales.',
   600,
   'aprobada',
-  'Comité Académico MatEs'
+  'Comité MatEs'
 ),
 (
   'Integral inmediata con dominio restringido',
@@ -155,11 +140,11 @@ INSERT INTO public.integrales (
   '\\ln|x| + C',
   ARRAY['\\log(x) + C'],
   ARRAY['inmediata', 'logaritmo'],
-  'Propuesta Oficial MatEs - Reglas de Solución',
-  'Válida en (0, \\infty) o con valor absoluto.',
+  'Propuesta Oficial MatEs',
+  'Válida en (0, infinito) o con valor absoluto.',
   300,
   'aprobada',
-  'Comité Académico MatEs'
+  'Comité MatEs'
 ),
 (
   'Integral trigonométrica por partes',
@@ -169,11 +154,11 @@ INSERT INTO public.integrales (
   '\\frac{x}{3}\\sin(3x) + \\frac{1}{9}\\cos(3x) + C',
   ARRAY['\\frac{3x\\sin(3x) + \\cos(3x)}{9} + C'],
   ARRAY['por partes', 'trigonométrica'],
-  'Spivak - Cálculo cap. 18',
-  'Integral típica para rondas eliminatorias de 16.',
+  'Spivak — Cálculo cap. 18',
+  'Típica para rondas de 16.',
   600,
   'aprobada',
-  'Comité Académico MatEs'
+  'Comité MatEs'
 ),
 (
   'Sustitución trigonométrica con radical',
@@ -184,22 +169,22 @@ INSERT INTO public.integrales (
   ARRAY['-\\frac{\\sqrt{4-x^2}}{x} - \\sin^{-1}(x/2) + C'],
   ARRAY['sustitución trigonométrica', 'radicales'],
   'Banco MatEs',
-  'Usar x = 2 sin(theta).',
+  'Hacer x = 2*sin(theta).',
   600,
   'aprobada',
-  'Comité Académico MatEs'
+  'Comité MatEs'
 ),
 (
-  'Integral de alta dificultad con truco de simetría',
+  'Integral definida con simetría (Propiedad de King)',
   '\\int_{0}^{\\frac{\\pi}{2}} \\frac{\\sqrt{\\sin x}}{\\sqrt{\\sin x} + \\sqrt{\\cos x}} \\, dx',
   'dificil',
   'fase3_finales',
   '\\frac{\\pi}{4}',
   ARRAY['\\pi / 4', '0.25\\pi'],
-  ARRAY['truco de King', 'definida', 'simetría'],
+  ARRAY['truco de King', 'definida', 'final'],
   'Almost Impossible Integrals / MIT Bee',
-  'Integral clásica de King: I + I = \\int_0^{\\pi/2} 1 dx = \\pi/2 => I = \\pi/4. Ideal para la Gran Final.',
+  'Ideal para la Gran Final en el Auditorio.',
   300,
   'aprobada',
-  'Comité Académico MatEs'
+  'Comité MatEs'
 );

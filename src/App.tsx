@@ -5,6 +5,8 @@ import { Navbar } from './components/Navbar';
 import { IntegralList } from './components/IntegralList';
 import { IntegralEditor } from './components/IntegralEditor';
 import { ProjectorMode } from './components/ProjectorMode';
+import { UserManagement } from './components/UserManagement';
+import { AuthModal } from './components/AuthModal';
 import { SupabaseGuideModal } from './components/SupabaseGuideModal';
 import confetti from 'canvas-confetti';
 import { Calendar, Award, Building2 } from 'lucide-react';
@@ -13,9 +15,10 @@ export function App() {
   const [user, setUser] = useState<UserProfile>(() => AuthService.getStoredProfile());
   const [integrals, setIntegrals] = useState<Integral[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentTab, setCurrentTab] = useState<'list' | 'editor' | 'projector'>('list');
+  const [currentTab, setCurrentTab] = useState<'list' | 'editor' | 'projector' | 'users'>('list');
   const [editingIntegral, setEditingIntegral] = useState<Integral | null>(null);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isSupabaseConnected, setIsSupabaseConnected] = useState(false);
 
   // Cargar integrales según rol
@@ -31,16 +34,35 @@ export function App() {
     }
   }, []);
 
+  // Verificar sesión y conexión inicial
   useEffect(() => {
-    setIsSupabaseConnected(IntegralService.isSupabaseConfigured());
-    loadIntegrals(user.role);
-  }, [user.role, loadIntegrals]);
+    const init = async () => {
+      setIsSupabaseConnected(IntegralService.isSupabaseConfigured());
+      const currentUser = await AuthService.getCurrentUser();
+      setUser(currentUser);
+      loadIntegrals(currentUser.role);
+    };
+    init();
+  }, [loadIntegrals]);
 
   const handleRoleChange = (newRole: UserRole) => {
     const updatedUser = { ...user, role: newRole };
     setUser(updatedUser);
     AuthService.setStoredProfile(updatedUser);
     loadIntegrals(newRole);
+  };
+
+  const handleAuthSuccess = (loggedUser: UserProfile) => {
+    setUser(loggedUser);
+    loadIntegrals(loggedUser.role);
+  };
+
+  const handleSignOut = async () => {
+    await AuthService.signOut();
+    const guestUser = AuthService.getStoredProfile();
+    setUser(guestUser);
+    loadIntegrals(guestUser.role);
+    setCurrentTab('list');
   };
 
   const handleSaveIntegral = async (data: Omit<Integral, 'id' | 'created_at'>) => {
@@ -83,6 +105,8 @@ export function App() {
         user={user}
         onChangeRole={handleRoleChange}
         onOpenConfig={() => setIsConfigOpen(true)}
+        onOpenAuth={() => setIsAuthOpen(true)}
+        onSignOut={handleSignOut}
         isSupabaseConnected={isSupabaseConnected}
         totalIntegralsCount={integrals.length}
       />
@@ -123,6 +147,10 @@ export function App() {
           />
         )}
 
+        {currentTab === 'users' && user.role === 'admin' && (
+          <UserManagement currentUser={user} />
+        )}
+
         {currentTab === 'projector' && (
           <ProjectorMode
             integrals={integrals}
@@ -155,6 +183,13 @@ export function App() {
           </div>
         </div>
       </footer>
+
+      {/* Modal Autenticación */}
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onAuthSuccess={handleAuthSuccess}
+      />
 
       {/* Modal Guía Supabase */}
       <SupabaseGuideModal
