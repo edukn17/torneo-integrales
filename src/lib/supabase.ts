@@ -13,22 +13,66 @@ const STORAGE_KEY_MOCK_INTEGRALS = 'torneo_mock_integrales_v1';
 const STORAGE_KEY_USER_PROFILE = 'torneo_mock_user_profile_v1';
 const STORAGE_KEY_MOCK_PROFILES = 'torneo_mock_all_profiles_v1';
 
+export function sanitizeSupabaseUrl(rawUrl: string): string {
+  if (!rawUrl) return '';
+  let url = rawUrl.trim();
+  // Si pegaron la URL del dashboard de Supabase (ej: https://supabase.com/dashboard/project/xyzabcdef...)
+  const dashboardMatch = url.match(/supabase\.com\/dashboard\/project\/([a-zA-Z0-9_-]+)/i);
+  if (dashboardMatch && dashboardMatch[1]) {
+    url = `https://${dashboardMatch[1]}.supabase.co`;
+  }
+  // Quitar trailing slashes
+  url = url.replace(/\/+$/, '');
+  // Quitar si agregaron /rest/v1 o /auth/v1
+  url = url.replace(/\/(rest|auth)\/v\d+.*$/i, '');
+  if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+    url = `https://${url}`;
+  }
+  return url;
+}
+
 export function getSupabaseCredentials(): { url: string; anonKey: string } {
-  const localUrl = localStorage.getItem(STORAGE_KEY_URL);
-  const localKey = localStorage.getItem(STORAGE_KEY_KEY);
+  let localUrl = localStorage.getItem(STORAGE_KEY_URL) || ENV_SUPABASE_URL;
+  let localKey = localStorage.getItem(STORAGE_KEY_KEY) || ENV_SUPABASE_ANON_KEY;
+
+  if (localUrl && localKey) {
+    // Si accidentalmente invirtieron la URL y la Key:
+    if (localUrl.startsWith('eyJ') && (localKey.startsWith('http') || localKey.includes('supabase.co'))) {
+      const temp = localUrl;
+      localUrl = localKey;
+      localKey = temp;
+      localStorage.setItem(STORAGE_KEY_URL, localUrl);
+      localStorage.setItem(STORAGE_KEY_KEY, localKey);
+    }
+  }
+
+  const sanitizedUrl = sanitizeSupabaseUrl(localUrl);
   return {
-    url: localUrl || ENV_SUPABASE_URL,
-    anonKey: localKey || ENV_SUPABASE_ANON_KEY,
+    url: sanitizedUrl,
+    anonKey: (localKey || '').trim(),
   };
 }
 
 export function saveSupabaseCredentials(url: string, anonKey: string) {
   if (url && anonKey) {
-    localStorage.setItem(STORAGE_KEY_URL, url.trim());
-    localStorage.setItem(STORAGE_KEY_KEY, anonKey.trim());
+    let cleanUrl = url.trim();
+    let cleanKey = anonKey.trim();
+
+    if (cleanUrl.startsWith('eyJ') && (cleanKey.startsWith('http') || cleanKey.includes('supabase.co'))) {
+      const temp = cleanUrl;
+      cleanUrl = cleanKey;
+      cleanKey = temp;
+    }
+
+    cleanUrl = sanitizeSupabaseUrl(cleanUrl);
+
+    localStorage.setItem(STORAGE_KEY_URL, cleanUrl);
+    localStorage.setItem(STORAGE_KEY_KEY, cleanKey);
+    supabaseInstance = null; // Reiniciar instancia con nueva URL
   } else {
     localStorage.removeItem(STORAGE_KEY_URL);
     localStorage.removeItem(STORAGE_KEY_KEY);
+    supabaseInstance = null;
   }
 }
 
