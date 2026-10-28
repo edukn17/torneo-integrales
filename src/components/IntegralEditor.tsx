@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Integral, DifficultyLevel, TournamentPhase, UserRole, ROLE_HIERARCHY } from '../types';
 import { MathView } from './MathView';
-import { Sparkles, Save, X } from 'lucide-react';
+import {
+  Sparkles,
+  Save,
+  X,
+  CheckCircle2,
+  AlertCircle,
+  HelpCircle,
+  Clock,
+  BookOpen,
+} from 'lucide-react';
 
 interface IntegralEditorProps {
   initialIntegral?: Integral | null;
@@ -46,7 +55,6 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
       setNotes(initialIntegral.notes || '');
       setTimeLimitSeconds(initialIntegral.time_limit_seconds || 600);
     } else {
-      // Por defecto según nivel
       if (allowedLevels.includes('medio')) {
         setDifficulty('medio');
         setPhase('fase2_eliminatorias');
@@ -59,7 +67,6 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
     }
   }, [initialIntegral, allowedLevels]);
 
-  // Sincronizar tiempo sugerido al cambiar fase
   const handlePhaseChange = (newPhase: TournamentPhase) => {
     setPhase(newPhase);
     if (newPhase === 'fase3_finales') {
@@ -84,7 +91,7 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
       return;
     }
     if (!solutionLatex.trim()) {
-      setErrorMsg('Por favor ingresa la solución matemática en formato LaTeX.');
+      setErrorMsg('Por favor ingresa la solución oficial en formato LaTeX.');
       return;
     }
 
@@ -124,52 +131,54 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
   };
 
   return (
-    <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-6 shadow-xl max-w-4xl mx-auto">
-      <div className="flex items-center justify-between pb-4 border-b border-slate-700">
+    <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-espol max-w-4xl mx-auto animate-fadeIn">
+      {/* Header del Editor */}
+      <div className="flex items-center justify-between pb-4 border-b border-slate-200">
         <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-blue-400" />
-            {initialIntegral ? 'Editar Integral' : 'Registrar Nueva Integral'}
+          <h2 className="text-xl font-bold text-espol-navy flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-espol-bright" />
+            {initialIntegral ? 'Editar Ejercicio de Integral' : 'Registrar Nueva Integral'}
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Ingresa la integral en sintaxis LaTeX estándar con su respuesta y notas de equivalencia.
+          <p className="text-xs text-slate-500 mt-0.5">
+            Ingreso y curaduría de problemas para las fases del Torneo de Integrales ESPOL.
           </p>
         </div>
         <button
           onClick={onCancel}
-          className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
+          className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
       </div>
 
       {errorMsg && (
-        <div className="mt-4 p-3 rounded-xl bg-red-950/60 border border-red-500/40 text-red-300 text-sm">
-          {errorMsg}
+        <div className="mt-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+          <span>{errorMsg}</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-        {/* Title */}
+      <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+        {/* Título */}
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
-            Título / Descripción del Ejercicio
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+            Título Descriptivo del Ejercicio
           </label>
           <input
             type="text"
             required
-            placeholder="Ej: Integral racional con fracciones parciales y sustitución"
+            placeholder="Ej: Integral racional con descomposición en fracciones simples"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500"
+            className="w-full bg-slate-50 focus:bg-white border border-slate-200 focus:border-espol-bright rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none transition-all shadow-sm"
           />
         </div>
 
-        {/* LaTeX Input & Live Preview (Split View) */}
+        {/* Editor de LaTeX y Pizarra KaTeX en Split View */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
                 Fórmula de la Integral (LaTeX)
               </label>
             </div>
@@ -179,10 +188,10 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
               placeholder="\int \frac{2x+2}{x^2+2x} \, dx"
               value={latexCode}
               onChange={(e) => setLatexCode(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 font-mono text-sm text-emerald-400 placeholder-slate-600 focus:outline-none focus:border-blue-500"
+              className="w-full bg-slate-900 text-emerald-400 font-mono text-sm border border-slate-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-espol-bright/30"
             />
 
-            {/* Quick Math Shortcuts */}
+            {/* Barra de Atajos Matemáticos */}
             <div className="flex flex-wrap gap-1 mt-2">
               {[
                 { label: '∫', code: '\\int ' },
@@ -199,7 +208,7 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
                   key={idx}
                   type="button"
                   onClick={() => insertSnippet(btn.code)}
-                  className="px-2 py-1 bg-slate-900 hover:bg-slate-700 border border-slate-700 rounded text-xs font-mono text-slate-300 hover:text-white transition-colors"
+                  className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-xs font-mono text-slate-700 transition-colors"
                 >
                   {btn.label}
                 </button>
@@ -208,29 +217,29 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
-              Previsualización en Vivo (KaTeX)
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+              Pizarra Virtual (Previsualización KaTeX)
             </label>
-            <div className="h-[120px] bg-slate-950/80 border border-slate-700/80 rounded-xl p-4 flex items-center justify-center overflow-auto shadow-inner">
-              <MathView math={latexCode} block={true} className="text-xl" />
+            <div className="h-[124px] bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-center overflow-auto shadow-inner text-xl font-serif text-slate-900">
+              <MathView math={latexCode} block={true} />
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">
-              Renderizado instantáneo. Los errores sintácticos de TeX se señalan en tiempo real.
+            <p className="text-[11px] text-slate-500 mt-1 flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Renderizado en tiempo real con sintaxis estándar de cálculo.
             </p>
           </div>
         </div>
 
-        {/* Difficulty Level & Phase Selectors */}
+        {/* Selectores de Nivel, Fase y Tiempo Límite */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
               Nivel de Dificultad
             </label>
             <select
-              aria-label="Nivel de Dificultad de la integral"
+              aria-label="Nivel de Dificultad"
               value={difficulty}
               onChange={(e) => setDifficulty(e.target.value as DifficultyLevel)}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500 cursor-pointer"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-espol-bright cursor-pointer"
             >
               {allowedLevels.includes('basico') && (
                 <option value="basico">Básico (Fase 1: Clasificación)</option>
@@ -239,51 +248,53 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
                 <option value="medio">Medio (Fase 2: Eliminatorias)</option>
               )}
               {allowedLevels.includes('dificil') && (
-                <option value="dificil">Difícil (Fase 3: Semis/Final)</option>
+                <option value="dificil">Difícil (Fase 3: Semis y Final)</option>
               )}
             </select>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
               Fase del Torneo
             </label>
             <select
-              aria-label="Fase del Torneo correspondiente"
+              aria-label="Fase del Torneo"
               value={phase}
               onChange={(e) => handlePhaseChange(e.target.value as TournamentPhase)}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500 cursor-pointer"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-espol-bright cursor-pointer"
             >
               <option value="fase1_clasificacion">Fase 1: Clasificación</option>
-              <option value="fase2_eliminatorias">Fase 2: Rondas Eliminatorias</option>
+              <option value="fase2_eliminatorias">Fase 2: Eliminatorias</option>
               <option value="fase3_finales">Fase 3: Semifinales y Final</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
-              Tiempo Límite (Segundos)
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+              Tiempo Límite
             </label>
-            <input
-              type="number"
-              aria-label="Tiempo límite en segundos"
-              min={60}
-              max={1800}
-              step={30}
-              value={timeLimitSeconds}
-              onChange={(e) => setTimeLimitSeconds(Number(e.target.value))}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500"
-            />
-            <span className="text-[11px] text-slate-400 mt-0.5 block">
-              {Math.round(timeLimitSeconds / 60)} minutos sugeridos
-            </span>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                aria-label="Tiempo límite en segundos"
+                min={60}
+                max={1800}
+                step={30}
+                value={timeLimitSeconds}
+                onChange={(e) => setTimeLimitSeconds(Number(e.target.value))}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-espol-bright"
+              />
+              <span className="text-xs text-slate-500 whitespace-nowrap font-medium">
+                {Math.round(timeLimitSeconds / 60)} min
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Main Solution & Preview */}
+        {/* Solución Oficial */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
               Solución Oficial (LaTeX)
             </label>
             <input
@@ -292,23 +303,23 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
               placeholder="\ln|x^2+2x| + C"
               value={solutionLatex}
               onChange={(e) => setSolutionLatex(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 font-mono text-sm text-emerald-400 focus:outline-none focus:border-blue-500"
+              className="w-full bg-slate-50 font-mono text-sm border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-espol-bright"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
               Vista previa de la Solución
             </label>
-            <div className="h-[42px] bg-slate-950/80 border border-slate-700/80 rounded-xl px-3 flex items-center justify-center overflow-auto shadow-inner text-sm">
+            <div className="h-[42px] bg-slate-50 border border-slate-200 rounded-xl px-3 flex items-center justify-center overflow-auto shadow-inner text-sm font-serif">
               <MathView math={solutionLatex} block={false} />
             </div>
           </div>
         </div>
 
-        {/* Alternative Solutions (Equivalencias según propuesta) */}
+        {/* Formas Algebraicamente Equivalentes Aceptadas */}
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
             Formas Algebraicamente Equivalentes Aceptadas (una por línea)
           </label>
           <textarea
@@ -316,17 +327,17 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
             placeholder={`\\ln|x| + \\ln|x+2| + C\n\\ln|x(x+2)| + C`}
             value={alternativeSolutionsStr}
             onChange={(e) => setAlternativeSolutionsStr(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 font-mono text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500"
+            className="w-full bg-slate-50 font-mono text-xs border border-slate-200 rounded-xl p-3 text-slate-800 focus:outline-none focus:border-espol-bright"
           />
-          <p className="text-[11px] text-slate-400 mt-1">
-            Permite al jurado validar al instante respuestas en distintas formas (ej: ln|x| + ln|x+2| vs ln|x² + 2x|).
+          <p className="text-[11px] text-slate-500 mt-1">
+            Garantiza que el jurado valide al instante variantes algebraicas válidas en duelos rápidos.
           </p>
         </div>
 
-        {/* Source Reference & Notes */}
+        {/* Fuente Bibliográfica & Etiquetas */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
               Fuente o Referencia Bibliográfica
             </label>
             <input
@@ -334,51 +345,51 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
               placeholder="Ej: Michael Spivak - Cálculo, Cap. 18 / MIT Bee"
               value={sourceReference}
               onChange={(e) => setSourceReference(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-espol-bright"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
-              Etiquetas (separadas por coma)
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+              Etiquetas Temáticas (separadas por coma)
             </label>
             <input
               type="text"
               placeholder="sustitución, fracciones parciales, trigonométrica"
               value={tagsStr}
               onChange={(e) => setTagsStr(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-espol-bright"
             />
           </div>
         </div>
 
-        {/* Internal Jury / Coordinator Notes */}
+        {/* Notas y Criterios del Jurado */}
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
-            Notas y Criterios Internos para el Jurado
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+            Criterios de Corrección para el Jurado
           </label>
           <textarea
             rows={2}
-            placeholder="Aclaraciones de dominio, restricciones de variable, trucos permitidos o tips de corrección rápida."
+            placeholder="Aclaraciones de dominio, trucos requeridos, o advertencias de signos/constantes."
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500"
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-espol-bright"
           />
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-700">
+        {/* Botones de Acción */}
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
+            className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-100 transition-colors"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-semibold rounded-xl shadow-lg shadow-blue-500/20 transition-all"
+            className="flex items-center gap-2 px-6 py-2.5 bg-espol-bright hover:bg-espol-blue text-white text-sm font-bold rounded-xl shadow-md transition-all duration-200"
           >
             <Save className="w-4 h-4" />
             {saving ? 'Guardando...' : initialIntegral ? 'Actualizar Integral' : 'Guardar en el Banco'}

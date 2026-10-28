@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Maximize2,
   Minimize2,
+  GraduationCap,
 } from 'lucide-react';
 
 interface ProjectorModeProps {
@@ -23,17 +24,14 @@ export const ProjectorMode: React.FC<ProjectorModeProps> = ({ integrals, onExit 
   const [showSolution, setShowSolution] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // Integrales disponibles
   const currentIntegral = integrals[currentIndex] || null;
 
-  // Cronómetro
   const initialTime = currentIntegral ? currentIntegral.time_limit_seconds : 600;
   const [timeLeft, setTimeLeft] = useState(initialTime);
   const [isRunning, setIsRunning] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Reiniciar tiempo al cambiar integral
   useEffect(() => {
     if (currentIntegral) {
       setTimeLeft(currentIntegral.time_limit_seconds || 600);
@@ -42,7 +40,6 @@ export const ProjectorMode: React.FC<ProjectorModeProps> = ({ integrals, onExit 
     }
   }, [currentIndex, currentIntegral]);
 
-  // Intervalo del temporizador
   useEffect(() => {
     let timer: ReturnType<typeof setInterval>;
     if (isRunning && timeLeft > 0) {
@@ -89,11 +86,11 @@ export const ProjectorMode: React.FC<ProjectorModeProps> = ({ integrals, onExit 
 
   if (!currentIntegral) {
     return (
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-12 text-center text-slate-400">
+      <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center text-slate-500 shadow-espol">
         No hay integrales disponibles para proyectar con tu nivel actual.
         <button
           onClick={onExit}
-          className="mt-4 block mx-auto px-4 py-2 bg-blue-600 text-white rounded-xl text-sm"
+          className="mt-4 block mx-auto px-4 py-2 bg-espol-bright text-white rounded-xl text-xs font-bold"
         >
           Volver al banco
         </button>
@@ -108,18 +105,20 @@ export const ProjectorMode: React.FC<ProjectorModeProps> = ({ integrals, onExit 
   return (
     <div
       ref={containerRef}
-      className="bg-slate-950 text-white rounded-3xl border border-slate-800/80 p-6 md:p-10 flex flex-col justify-between min-h-[620px] shadow-2xl relative overflow-hidden"
+      className="bg-espol-dark text-white rounded-3xl border-2 border-espol-navy p-6 md:p-10 flex flex-col justify-between min-h-[640px] shadow-2xl relative overflow-hidden"
     >
-      {/* Background Glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-48 bg-blue-500/10 blur-[100px] pointer-events-none rounded-full" />
-
-      {/* Header Bar */}
-      <div className="flex items-center justify-between z-10">
+      {/* Cintillo Superior */}
+      <div className="flex items-center justify-between z-10 border-b border-white/10 pb-4">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
-            Duelo MatEs • Integral {currentIndex + 1} de {integrals.length}
+          <div className="flex items-center gap-1.5 text-espol-gold font-bold text-xs uppercase tracking-wider">
+            <GraduationCap className="w-4 h-4" />
+            <span>ESPOL • FCNM</span>
+          </div>
+          <span className="text-white/20">|</span>
+          <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-white/10 text-slate-200 border border-white/15">
+            Duelo de Integrales • Ejercicio {currentIndex + 1} de {integrals.length}
           </span>
-          <span className={`text-xs font-bold px-3 py-1 rounded-full border ${levelInfo.badge}`}>
+          <span className="text-xs font-bold px-3 py-1 rounded-full bg-espol-gold text-espol-navy">
             {levelInfo.label}
           </span>
         </div>
@@ -127,44 +126,44 @@ export const ProjectorMode: React.FC<ProjectorModeProps> = ({ integrals, onExit 
         <div className="flex items-center gap-2">
           <button
             onClick={toggleFullscreen}
-            className="p-2 text-slate-400 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-700/60 rounded-xl transition-all"
-            title="Pantalla completa para proyector"
+            className="p-2 text-slate-300 hover:text-white bg-white/10 hover:bg-white/20 rounded-xl transition-all"
+            title="Pantalla completa"
           >
             {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
           </button>
           <button
             onClick={onExit}
-            className="px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-700/60 rounded-xl transition-all"
+            className="px-3.5 py-1.5 text-xs font-bold text-slate-200 hover:text-white bg-white/10 hover:bg-white/20 rounded-xl transition-all"
           >
-            Cerrar Proyector
+            Salir
           </button>
         </div>
       </div>
 
-      {/* Central Area: Big LaTeX Formula */}
+      {/* Área Central: Pizarra de Proyección */}
       <div className="my-8 text-center z-10 flex flex-col items-center justify-center">
-        <h3 className="text-sm font-medium text-slate-400 uppercase tracking-widest mb-4">
-          Resuelve la siguiente integral:
+        <h3 className="text-xs font-bold text-espol-gold uppercase tracking-widest mb-4">
+          Resuelve la siguiente integral en la pizarra:
         </h3>
 
-        <div className="py-8 px-6 md:px-12 rounded-3xl bg-slate-900/80 border border-slate-700/70 shadow-2xl max-w-4xl w-full flex items-center justify-center text-3xl sm:text-4xl md:text-5xl font-serif">
+        <div className="py-10 px-6 md:px-14 rounded-3xl bg-white text-slate-900 border-4 border-espol-gold shadow-2xl max-w-4xl w-full flex items-center justify-center text-3xl sm:text-4xl md:text-5xl font-serif">
           <MathView math={currentIntegral.latex_code} block={true} />
         </div>
 
-        {/* Revealed Solution Drawer */}
+        {/* Solución Revelada para el Jurado */}
         {showSolution && (
-          <div className="mt-6 p-6 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 max-w-2xl w-full text-center animate-fadeIn">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 block mb-2">
-              Solución Oficial del Jurado:
+          <div className="mt-6 p-6 rounded-2xl bg-emerald-950/70 border-2 border-emerald-400 max-w-2xl w-full text-center animate-fadeIn shadow-xl">
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-300 block mb-2">
+              Solución Oficial del Jurado MatEs:
             </span>
-            <div className="text-2xl sm:text-3xl font-mono text-emerald-300">
+            <div className="text-2xl sm:text-3xl font-mono text-emerald-200">
               <MathView math={currentIntegral.solution_latex} block={true} />
             </div>
             {currentIntegral.alternative_solutions?.length > 0 && (
-              <div className="mt-2 text-xs text-slate-400">
+              <div className="mt-2 text-xs text-emerald-300/80">
                 Formas equivalentes:{' '}
                 {currentIntegral.alternative_solutions.map((a, i) => (
-                  <span key={i} className="inline-block mx-1 font-mono text-emerald-200">
+                  <span key={i} className="inline-block mx-1 font-mono text-white">
                     <MathView math={a} block={false} />
                   </span>
                 ))}
@@ -174,38 +173,38 @@ export const ProjectorMode: React.FC<ProjectorModeProps> = ({ integrals, onExit 
         )}
       </div>
 
-      {/* Footer Controls: Big Timer & Navigation */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-800/80 z-10">
-        {/* Navigation between Integrals */}
+      {/* Controles de Cronómetro y Navegación */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-white/10 z-10">
+        {/* Navegación */}
         <div className="flex items-center gap-2">
           <button
             onClick={handlePrev}
             disabled={currentIndex === 0}
-            className="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 disabled:opacity-40 text-slate-200 transition-colors"
+            className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-30 text-white transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <span className="text-xs font-mono text-slate-400 px-2">
+          <span className="text-xs font-mono text-slate-300 px-2 font-bold">
             {currentIndex + 1} / {integrals.length}
           </span>
           <button
             onClick={handleNext}
             disabled={currentIndex === integrals.length - 1}
-            className="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 disabled:opacity-40 text-slate-200 transition-colors"
+            className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-30 text-white transition-colors"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Center: Big Countdown Timer */}
+        {/* Cronómetro Digital de Duelo */}
         <div className="flex items-center gap-4">
           <div
-            className={`font-mono font-extrabold text-3xl sm:text-4xl tracking-wider px-4 py-1.5 rounded-2xl border transition-all ${
+            className={`font-mono font-extrabold text-3xl sm:text-4xl tracking-wider px-5 py-2 rounded-2xl border-2 transition-all ${
               isTimeUp
-                ? 'bg-rose-950/80 border-rose-500 text-rose-400 animate-pulse'
+                ? 'bg-rose-900 border-rose-500 text-rose-200 animate-pulse'
                 : isTimeCritical
-                ? 'bg-amber-950/80 border-amber-500 text-amber-400'
-                : 'bg-slate-900 border-slate-700 text-white'
+                ? 'bg-amber-900 border-amber-400 text-amber-200'
+                : 'bg-white/10 border-white/20 text-white'
             }`}
           >
             {formatTime(timeLeft)}
@@ -214,10 +213,10 @@ export const ProjectorMode: React.FC<ProjectorModeProps> = ({ integrals, onExit 
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => setIsRunning(!isRunning)}
-              className={`p-2.5 rounded-xl text-white font-semibold transition-all shadow-lg ${
+              className={`p-3 rounded-xl text-espol-navy font-bold transition-all shadow-lg ${
                 isRunning
-                  ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-600/30'
-                  : 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/30'
+                  ? 'bg-amber-400 hover:bg-amber-300'
+                  : 'bg-espol-gold hover:bg-espol-goldHover'
               }`}
             >
               {isRunning ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
@@ -227,7 +226,7 @@ export const ProjectorMode: React.FC<ProjectorModeProps> = ({ integrals, onExit 
                 setIsRunning(false);
                 setTimeLeft(currentIntegral.time_limit_seconds || 600);
               }}
-              className="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 transition-colors"
+              className="p-3 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 transition-colors"
               title="Reiniciar cronómetro"
             >
               <RotateCcw className="w-5 h-5" />
@@ -235,18 +234,18 @@ export const ProjectorMode: React.FC<ProjectorModeProps> = ({ integrals, onExit 
           </div>
         </div>
 
-        {/* Reveal Solution Button for Jury */}
+        {/* Botón de Solución */}
         <div>
           <button
             onClick={() => setShowSolution(!showSolution)}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all ${
               showSolution
-                ? 'bg-emerald-600/20 text-emerald-300 border-emerald-500/50'
-                : 'bg-slate-900 text-slate-300 border-slate-700 hover:bg-slate-800'
+                ? 'bg-emerald-500 text-espol-navy border-emerald-400 font-extrabold'
+                : 'bg-white/10 text-white border-white/20 hover:bg-white/20'
             }`}
           >
             {showSolution ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            {showSolution ? 'Ocultar Solución' : 'Revelar Solución'}
+            {showSolution ? 'Ocultar Solución' : 'Revelar al Jurado'}
           </button>
         </div>
       </div>

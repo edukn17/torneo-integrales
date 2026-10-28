@@ -6,6 +6,7 @@ import {
   Check,
   ExternalLink,
   RotateCcw,
+  GraduationCap,
 } from 'lucide-react';
 import {
   getSupabaseCredentials,
@@ -53,9 +54,8 @@ export const SupabaseGuideModal: React.FC<SupabaseGuideModalProps> = ({
   };
 
   const handleCopySql = () => {
-    // Schema script
     const sqlText = `-- ==============================================================================
--- TORNEO DE INTEGRALES - CLUB MATES / AEFIEC / IEEE-HKN
+-- TORNEO DE INTEGRALES - CLUB MATES / AEFIEC / IEEE-HKN (ESPOL - FCNM)
 -- Esquema de Base de Datos y Políticas de Seguridad (Supabase PostgreSQL + RLS)
 -- ==============================================================================
 
@@ -148,58 +148,58 @@ CREATE POLICY "Admins pueden eliminar integrales"
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl p-6 sm:p-8">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-white border border-slate-200 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl overflow-hidden">
+        {/* Header Institucional */}
+        <div className="bg-espol-navy p-6 text-white flex items-center justify-between border-b-2 border-espol-gold">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
+            <div className="p-2.5 rounded-xl bg-white/10 text-espol-gold">
               <Database className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">
-                Configuración de Supabase (Opción A)
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                Conectar con Supabase
               </h3>
-              <p className="text-xs text-slate-400">
-                Paso a paso para conectar la base de datos en la nube para el equipo de MatEs
+              <p className="text-xs text-slate-300">
+                Sincronización en tiempo real para el equipo de MatEs / FCNM
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+            className="p-2 text-slate-300 hover:text-white rounded-xl hover:bg-white/10 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Steps Guide */}
-        <div className="mt-6 space-y-4">
-          <div className="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/60">
-            <div className="flex items-center gap-2 text-sm font-bold text-white mb-1">
-              <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs">
+        {/* Pasos */}
+        <div className="p-6 sm:p-8 space-y-4">
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+            <div className="flex items-center gap-2 text-sm font-bold text-slate-800 mb-1">
+              <span className="w-5 h-5 rounded-full bg-espol-bright text-white flex items-center justify-center text-xs">
                 1
               </span>
               Crea tu proyecto gratuito en Supabase
             </div>
-            <p className="text-xs text-slate-300 ml-7">
+            <p className="text-xs text-slate-600 ml-7">
               Ingresa a{' '}
               <a
                 href="https://supabase.com"
                 target="_blank"
                 rel="noreferrer"
-                className="text-blue-400 hover:underline inline-flex items-center gap-1 font-medium"
+                className="text-espol-bright hover:underline inline-flex items-center gap-1 font-bold"
               >
                 supabase.com <ExternalLink className="w-3 h-3" />
               </a>{' '}
-              e inicia sesión con tu cuenta de GitHub. Haz clic en <strong>New Project</strong> (ej. <em>torneo-integrales</em>).
+              con tu cuenta de GitHub y crea un nuevo proyecto llamado <code>torneo-integrales</code>.
             </p>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/60">
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm font-bold text-white mb-1">
-                <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs">
+              <div className="flex items-center gap-2 text-sm font-bold text-slate-800 mb-1">
+                <span className="w-5 h-5 rounded-full bg-espol-bright text-white flex items-center justify-center text-xs">
                   2
                 </span>
                 Ejecuta el script SQL en Supabase
@@ -207,83 +207,83 @@ CREATE POLICY "Admins pueden eliminar integrales"
               <button
                 type="button"
                 onClick={handleCopySql}
-                className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold rounded-lg transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1 bg-espol-navy hover:bg-espol-blue text-white text-xs font-bold rounded-lg transition-colors"
               >
-                {copiedSql ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                {copiedSql ? <Check className="w-3.5 h-3.5 text-espol-gold" /> : <Copy className="w-3.5 h-3.5" />}
                 {copiedSql ? 'Copiado' : 'Copiar Script SQL'}
               </button>
             </div>
-            <p className="text-xs text-slate-300 ml-7">
-              En tu proyecto de Supabase, ve a la pestaña <strong>SQL Editor</strong>, pega el código que copiaste arriba y haz clic en <strong>Run</strong>. Esto creará las tablas y las políticas de seguridad (RLS) para que cada nivel solo vea lo que le corresponde.
+            <p className="text-xs text-slate-600 ml-7">
+              En Supabase, entra a la pestaña <strong>SQL Editor</strong>, pega el script copiado y haz clic en <strong>Run</strong> para inicializar las tablas y las políticas de seguridad (RLS).
             </p>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/60">
-            <div className="flex items-center gap-2 text-sm font-bold text-white mb-1">
-              <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs">
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+            <div className="flex items-center gap-2 text-sm font-bold text-slate-800 mb-1">
+              <span className="w-5 h-5 rounded-full bg-espol-bright text-white flex items-center justify-center text-xs">
                 3
               </span>
-              Copia tus credenciales de API
+              Ingresa las credenciales de tu proyecto
             </div>
-            <p className="text-xs text-slate-300 ml-7">
-              En Supabase, dirígete a <strong>Project Settings &gt; API</strong> y copia el <em>Project URL</em> y el <em>anon public key</em>. Pégalos en el formulario a continuación:
+            <p className="text-xs text-slate-600 ml-7">
+              En Supabase, ve a <strong>Project Settings &gt; API</strong> y copia el <em>Project URL</em> y el <em>anon public key</em>:
             </p>
           </div>
-        </div>
 
-        {/* Credentials Form */}
-        <form onSubmit={handleSave} className="mt-6 space-y-4 pt-4 border-t border-slate-800">
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">
-              Project URL de Supabase
-            </label>
-            <input
-              type="text"
-              placeholder="https://xyzcompany.supabase.co"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-blue-500 font-mono"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">
-              Anon Public Key de Supabase
-            </label>
-            <input
-              type="text"
-              placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-              value={anonKey}
-              onChange={(e) => setAnonKey(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-blue-500 font-mono"
-            />
-          </div>
-
-          {savedSuccess && (
-            <div className="p-3 bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs rounded-xl flex items-center gap-2">
-              <Check className="w-4 h-4" />
-              ¡Credenciales guardadas con éxito! Conectando a Supabase...
+          {/* Formulario */}
+          <form onSubmit={handleSave} className="space-y-4 pt-3 border-t border-slate-200">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                Project URL de Supabase
+              </label>
+              <input
+                type="text"
+                placeholder="https://xyzcompany.supabase.co"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-espol-bright font-mono"
+              />
             </div>
-          )}
 
-          <div className="flex items-center justify-between pt-2">
-            <button
-              type="button"
-              onClick={handleResetToMock}
-              className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              Usar Modo Local / Demo
-            </button>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                Anon Public Key de Supabase
+              </label>
+              <input
+                type="text"
+                placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                value={anonKey}
+                onChange={(e) => setAnonKey(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-espol-bright font-mono"
+              />
+            </div>
 
-            <button
-              type="submit"
-              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm rounded-xl shadow-lg shadow-blue-500/20 transition-all"
-            >
-              Guardar y Conectar
-            </button>
-          </div>
-        </form>
+            {savedSuccess && (
+              <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-center gap-2 font-semibold">
+                <Check className="w-4 h-4 text-emerald-600" />
+                ¡Credenciales guardadas con éxito! Conectando a Supabase...
+              </div>
+            )}
+
+            <div className="flex items-center justify-between pt-2">
+              <button
+                type="button"
+                onClick={handleResetToMock}
+                className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 font-semibold"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                Restaurar Modo Local / Demo
+              </button>
+
+              <button
+                type="submit"
+                className="px-5 py-2.5 bg-espol-bright hover:bg-espol-blue text-white font-bold text-sm rounded-xl shadow-md transition-all"
+              >
+                Guardar y Conectar
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

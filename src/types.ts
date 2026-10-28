@@ -45,25 +45,25 @@ export const LEVEL_LABELS: Record<DifficultyLevel, { label: string; color: strin
   basico: {
     label: 'Básico',
     color: 'emerald',
-    badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+    badge: 'bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold',
     phase: 'Fase 1: Clasificación',
   },
   medio: {
     label: 'Medio',
     color: 'amber',
-    badge: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-    phase: 'Fase 2: Eliminatorias (16 y 8)',
+    badge: 'bg-amber-50 text-amber-800 border-amber-200 font-semibold',
+    phase: 'Fase 2: Eliminatorias',
   },
   dificil: {
     label: 'Difícil',
     color: 'rose',
-    badge: 'bg-rose-500/10 text-rose-400 border-rose-500/30',
-    phase: 'Fase 3: Semifinales y Final',
+    badge: 'bg-rose-50 text-rose-700 border-rose-200 font-semibold',
+    phase: 'Fase 3: Semis y Final',
   },
 };
 
 export const PHASE_LABELS: Record<TournamentPhase, string> = {
-  fase1_clasificacion: 'Fase 1: Examen de Clasificación (Escrito)',
-  fase2_eliminatorias: 'Fase 2: Rondas Eliminatorias (Duelos 10 min)',
+  fase1_clasificacion: 'Fase 1: Clasificación (Escrito)',
+  fase2_eliminatorias: 'Fase 2: Eliminatorias (Duelos 10 min)',
   fase3_finales: 'Fase 3: Semifinales y Final (Auditorio 5 min)',
 };

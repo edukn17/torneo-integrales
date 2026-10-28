@@ -7,7 +7,7 @@ import { IntegralEditor } from './components/IntegralEditor';
 import { ProjectorMode } from './components/ProjectorMode';
 import { SupabaseGuideModal } from './components/SupabaseGuideModal';
 import confetti from 'canvas-confetti';
-import { Calendar, Award } from 'lucide-react';
+import { Calendar, Award, GraduationCap, Building2 } from 'lucide-react';
 
 export function App() {
   const [user, setUser] = useState<UserProfile>(() => AuthService.getStoredProfile());
@@ -31,13 +31,11 @@ export function App() {
     }
   }, []);
 
-  // Verificar conexión inicial
   useEffect(() => {
     setIsSupabaseConnected(IntegralService.isSupabaseConfigured());
     loadIntegrals(user.role);
   }, [user.role, loadIntegrals]);
 
-  // Cambiar rol de prueba
   const handleRoleChange = (newRole: UserRole) => {
     const updatedUser = { ...user, role: newRole };
     setUser(updatedUser);
@@ -45,7 +43,6 @@ export function App() {
     loadIntegrals(newRole);
   };
 
-  // Guardar nueva integral o actualización
   const handleSaveIntegral = async (data: Omit<Integral, 'id' | 'created_at'>) => {
     if (editingIntegral) {
       await IntegralService.updateIntegral(editingIntegral.id, data);
@@ -62,7 +59,6 @@ export function App() {
     await loadIntegrals(user.role);
   };
 
-  // Eliminar integral
   const handleDeleteIntegral = async (id: string) => {
     if (window.confirm('¿Seguro que deseas eliminar este ejercicio del banco del torneo?')) {
       await IntegralService.deleteIntegral(id);
@@ -70,15 +66,14 @@ export function App() {
     }
   };
 
-  // Editar integral
   const handleEditIntegral = (integral: Integral) => {
     setEditingIntegral(integral);
     setCurrentTab('editor');
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 font-sans selection:bg-blue-600 selection:text-white">
-      {/* Barra de navegación superior */}
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800 font-sans selection:bg-espol-bright selection:text-white">
+      {/* Barra de navegación superior con diseño ESPOL / FCNM */}
       <Navbar
         currentTab={currentTab}
         onSelectTab={(tab) => {
@@ -89,16 +84,17 @@ export function App() {
         onChangeRole={handleRoleChange}
         onOpenConfig={() => setIsConfigOpen(true)}
         isSupabaseConnected={isSupabaseConnected}
+        totalIntegralsCount={integrals.length}
       />
 
       {/* Contenido Principal */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fadeIn">
         {currentTab === 'list' && (
           <div>
             {loading ? (
               <div className="flex flex-col items-center justify-center min-h-[300px]">
-                <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-3" />
-                <p className="text-sm text-slate-400">Cargando integrales autorizadas...</p>
+                <div className="w-10 h-10 border-4 border-espol-bright border-t-transparent rounded-full animate-spin mb-3" />
+                <p className="text-sm font-semibold text-slate-500">Cargando banco de integrales FCNM...</p>
               </div>
             ) : (
               <IntegralList
@@ -135,22 +131,28 @@ export function App() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="bg-slate-900/60 border-t border-slate-800/80 py-6 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <div className="flex items-center gap-3">
-            <span className="font-semibold text-slate-400">Torneo de Integrales ESPOL</span>
+      {/* Footer Institucional ESPOL / FCNM */}
+      <footer className="bg-white border-t border-slate-200 py-6 mt-12 text-xs text-slate-500">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-espol-navy">ESPOL</span>
             <span>•</span>
-            <span>Organizado por Club MatEs, AEFIEC e IEEE-HKN Nu Zeta</span>
+            <span>Facultad de Ciencias Naturales y Matemáticas (FCNM)</span>
+            <span>•</span>
+            <span>Club MatEs &amp; AEFIEC &amp; IEEE-HKN Nu Zeta</span>
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1 text-slate-400">
-              <Calendar className="w-3.5 h-3.5 text-blue-400" /> Diciembre 2026
+          <div className="flex items-center gap-4 font-semibold text-slate-600">
+            <span className="flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5 text-espol-bright" /> Diciembre 2026
             </span>
             <span>•</span>
-            <span className="flex items-center gap-1 text-slate-400">
-              <Award className="w-3.5 h-3.5 text-amber-400" /> Premio $50 al Ganador
+            <span className="flex items-center gap-1">
+              <Building2 className="w-3.5 h-3.5 text-slate-400" /> Auditorio Pedro Franco Dávila
+            </span>
+            <span>•</span>
+            <span className="flex items-center gap-1 text-amber-600">
+              <Award className="w-3.5 h-3.5" /> Premio $50
             </span>
           </div>
         </div>
