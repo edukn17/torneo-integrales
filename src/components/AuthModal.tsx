@@ -8,7 +8,6 @@ interface AuthModalProps {
   initialTab?: 'login' | 'register';
   onClose: () => void;
   onAuthSuccess: (user: UserProfile) => void;
-  onOpenConfig?: () => void;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
@@ -16,7 +15,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   initialTab = 'login',
   onClose,
   onAuthSuccess,
-  onOpenConfig,
 }) => {
   const [tab, setTab] = useState<'login' | 'register'>(initialTab);
 
@@ -143,22 +141,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {/* Formulario */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {errorMsg && (
-            <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs space-y-2">
-              <div className="flex items-center gap-2 font-semibold">
-                <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
-                <span>{errorMsg}</span>
-              </div>
-              {onOpenConfig && (
-                <div className="pt-1 border-t border-red-200/60">
-                  <button
-                    type="button"
-                    onClick={onOpenConfig}
-                    className="text-[11px] font-bold text-fcnm hover:underline"
-                  >
-                    ⚙ Haz clic aquí para verificar o corregir el Project URL de Supabase
-                  </button>
-                </div>
-              )}
+            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2 font-medium">
+              <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+              <span>{errorMsg}</span>
             </div>
           )}
 

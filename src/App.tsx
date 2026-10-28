@@ -7,9 +7,8 @@ import { IntegralList } from './components/IntegralList';
 import { IntegralEditor } from './components/IntegralEditor';
 import { UserManagement } from './components/UserManagement';
 import { AuthModal } from './components/AuthModal';
-import { SupabaseConfigModal } from './components/SupabaseConfigModal';
 import confetti from 'canvas-confetti';
-import { Calendar, Award, Building2, Database } from 'lucide-react';
+import { Calendar, Award, Building2 } from 'lucide-react';
 
 export function App() {
   const [user, setUser] = useState<UserProfile | null>(() => AuthService.getStoredProfile());
@@ -18,7 +17,6 @@ export function App() {
   const [currentTab, setCurrentTab] = useState<'list' | 'editor' | 'users'>('list');
   const [editingIntegral, setEditingIntegral] = useState<Integral | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [authTab, setAuthTab] = useState<'login' | 'register'>('login');
 
   // Cargar integrales según rol
@@ -190,14 +188,6 @@ export function App() {
             <span className="flex items-center gap-1 text-amber-600">
               <Award className="w-3.5 h-3.5" /> Premio $50 al Ganador
             </span>
-            <span>•</span>
-            <button
-              onClick={() => setIsConfigOpen(true)}
-              className="text-slate-400 hover:text-fcnm transition-colors flex items-center gap-1 font-normal"
-              title="Ajustar credenciales de Supabase"
-            >
-              <Database className="w-3 h-3" /> Configuración
-            </button>
           </div>
         </div>
       </footer>
@@ -208,21 +198,6 @@ export function App() {
         initialTab={authTab}
         onClose={() => setIsAuthOpen(false)}
         onAuthSuccess={handleAuthSuccess}
-        onOpenConfig={() => {
-          setIsAuthOpen(false);
-          setIsConfigOpen(true);
-        }}
-      />
-
-      {/* Modal Configuración Supabase */}
-      <SupabaseConfigModal
-        isOpen={isConfigOpen}
-        onClose={() => setIsConfigOpen(false)}
-        onSuccess={() => {
-          if (user) {
-            loadIntegrals(user.role);
-          }
-        }}
       />
     </div>
   );
