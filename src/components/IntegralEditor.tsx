@@ -52,17 +52,34 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
       setNotes(initialIntegral.notes || '');
       setTimeLimitSeconds(initialIntegral.time_limit_seconds || 600);
     } else {
-      if (allowedLevels.includes('medio')) {
-        setDifficulty('medio');
+      const defaultLevel: DifficultyLevel = allowedLevels[0] || 'basico';
+      setDifficulty(defaultLevel);
+      if (defaultLevel === 'dificil') {
+        setPhase('fase3_finales');
+        setTimeLimitSeconds(300);
+      } else if (defaultLevel === 'medio') {
         setPhase('fase2_eliminatorias');
         setTimeLimitSeconds(600);
       } else {
-        setDifficulty('basico');
         setPhase('fase1_clasificacion');
         setTimeLimitSeconds(600);
       }
     }
   }, [initialIntegral, allowedLevels]);
+
+  const handleDifficultyChange = (newDifficulty: DifficultyLevel) => {
+    setDifficulty(newDifficulty);
+    if (newDifficulty === 'dificil') {
+      setPhase('fase3_finales');
+      setTimeLimitSeconds(300);
+    } else if (newDifficulty === 'medio') {
+      setPhase('fase2_eliminatorias');
+      setTimeLimitSeconds(600);
+    } else {
+      setPhase('fase1_clasificacion');
+      setTimeLimitSeconds(600);
+    }
+  };
 
   const handlePhaseChange = (newPhase: TournamentPhase) => {
     setPhase(newPhase);
@@ -251,8 +268,9 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
             <select
               aria-label="Nivel de Dificultad"
               value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value as DifficultyLevel)}
-              className="w-full bg-slate-50 border border-purple-100 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-fcnm cursor-pointer"
+              disabled={userRole !== 'admin'}
+              onChange={(e) => handleDifficultyChange(e.target.value as DifficultyLevel)}
+              className="w-full bg-slate-50 border border-purple-100 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-fcnm cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
             >
               {allowedLevels.includes('basico') && (
                 <option value="basico">Básico (Fase 1: Clasificación)</option>
@@ -273,8 +291,9 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
             <select
               aria-label="Fase del Torneo"
               value={phase}
+              disabled={userRole !== 'admin'}
               onChange={(e) => handlePhaseChange(e.target.value as TournamentPhase)}
-              className="w-full bg-slate-50 border border-purple-100 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-fcnm cursor-pointer"
+              className="w-full bg-slate-50 border border-purple-100 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-fcnm cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
             >
               <option value="fase1_clasificacion">Fase 1: Clasificación</option>
               <option value="fase2_eliminatorias">Fase 2: Eliminatorias</option>

@@ -159,21 +159,20 @@ CREATE TRIGGER trg_handle_integral_status
 
 ALTER TABLE public.integrales ENABLE ROW LEVEL SECURITY;
 
--- 3. POLÍTICAS DE ACCESO JERÁRQUICO BLINDADAS PARA INTEGRALES
+-- 3. POLÍTICAS DE ACCESO COMPARTIMENTADO ESTRICTO POR NIVEL PARA INTEGRALES
 
--- SELECT: Jerarquía de acceso al banco de integrales
+-- SELECT: Lectura exclusiva del nivel asignado (básico solo básico, medio solo medio, difícil solo difícil)
 DROP POLICY IF EXISTS "Lectura jerarquica de integrales segun rol del colaborador" ON public.integrales;
-CREATE POLICY "Lectura jerarquica de integrales segun rol del colaborador"
+DROP POLICY IF EXISTS "Lectura estricta de integrales segun nivel del colaborador" ON public.integrales;
+CREATE POLICY "Lectura estricta de integrales segun nivel del colaborador"
   ON public.integrales FOR SELECT
   TO authenticated
   USING (
     public.current_user_role() = 'admin'
-    OR (public.current_user_role() = 'dificil' AND difficulty_level IN ('basico', 'medio', 'dificil'))
-    OR (public.current_user_role() = 'medio' AND difficulty_level IN ('basico', 'medio'))
-    OR (public.current_user_role() = 'basico' AND difficulty_level = 'basico')
+    OR public.current_user_role() = difficulty_level
   );
 
--- INSERT: Registro según nivel permitido (básico sube básico, medio sube medio/básico, difícil sube todos)
+-- INSERT: Registro exclusivo en el propio nivel del colaborador
 DROP POLICY IF EXISTS "Colaboradores pueden registrar integrales" ON public.integrales;
 CREATE POLICY "Colaboradores pueden registrar integrales"
   ON public.integrales FOR INSERT
@@ -182,9 +181,7 @@ CREATE POLICY "Colaboradores pueden registrar integrales"
     (created_by IS NULL OR created_by = auth.uid())
     AND (
       public.current_user_role() = 'admin'
-      OR (public.current_user_role() = 'dificil' AND difficulty_level IN ('basico', 'medio', 'dificil'))
-      OR (public.current_user_role() = 'medio' AND difficulty_level IN ('basico', 'medio'))
-      OR (public.current_user_role() = 'basico' AND difficulty_level = 'basico')
+      OR public.current_user_role() = difficulty_level
     )
   );
 
@@ -210,9 +207,8 @@ CREATE POLICY "Colaboradores pueden editar sus propias propuestas"
     created_by = auth.uid() 
     AND status = 'propuesta'
     AND (
-      (public.current_user_role() = 'dificil' AND difficulty_level IN ('basico', 'medio', 'dificil'))
-      OR (public.current_user_role() = 'medio' AND difficulty_level IN ('basico', 'medio'))
-      OR (public.current_user_role() = 'basico' AND difficulty_level = 'basico')
+      public.current_user_role() = 'admin'
+      OR public.current_user_role() = difficulty_level
     )
   );
 

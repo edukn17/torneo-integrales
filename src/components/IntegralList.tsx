@@ -79,16 +79,6 @@ export const IntegralList: React.FC<IntegralListProps> = ({
       return true;
     });
   }, [integrals, allowedLevels, selectedDifficulty, selectedStatus, search]);
-        const inTitle = item.title.toLowerCase().includes(query);
-        const inLatex = item.latex_code.toLowerCase().includes(query);
-        const inTags = item.tags.some((t) => t.toLowerCase().includes(query));
-        const inSource = item.source_reference.toLowerCase().includes(query);
-        return inTitle || inLatex || inTags || inSource;
-      }
-
-      return true;
-    });
-  }, [integrals, allowedLevels, selectedDifficulty, search]);
 
   const toggleSolution = (id: string) => {
     setRevealedSolutions((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -114,18 +104,37 @@ export const IntegralList: React.FC<IntegralListProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Card Fase 1 - Básico */}
         <div
-          onClick={() => setSelectedDifficulty(selectedDifficulty === 'basico' ? 'todos' : 'basico')}
-          className={`cursor-pointer bg-white rounded-2xl p-5 border transition-all duration-300 shadow-fcnm hover:shadow-fcnm-hover ${
-            selectedDifficulty === 'basico'
-              ? 'border-emerald-500 ring-2 ring-emerald-500/20'
-              : 'border-purple-100 hover:border-purple-300'
+          onClick={() => {
+            if (allowedLevels.includes('basico')) {
+              setSelectedDifficulty(selectedDifficulty === 'basico' ? 'todos' : 'basico');
+            }
+          }}
+          className={`rounded-2xl p-5 border transition-all duration-300 shadow-fcnm ${
+            allowedLevels.includes('basico')
+              ? 'bg-white cursor-pointer hover:shadow-fcnm-hover border-purple-100 hover:border-purple-300'
+              : 'bg-slate-100/70 opacity-60 border-dashed border-slate-300 cursor-not-allowed'
+          } ${
+            selectedDifficulty === 'basico' ? 'border-emerald-500 ring-2 ring-emerald-500/20' : ''
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1.5">
-              <Unlock className="w-3 h-3 text-emerald-600" /> Nivel Básico
+            <span
+              className={`text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border flex items-center gap-1.5 ${
+                allowedLevels.includes('basico')
+                  ? 'text-emerald-700 bg-emerald-50 border-emerald-200'
+                  : 'text-slate-500 bg-slate-200 border-slate-300'
+              }`}
+            >
+              {allowedLevels.includes('basico') ? (
+                <Unlock className="w-3 h-3 text-emerald-600" />
+              ) : (
+                <Lock className="w-3 h-3 text-slate-500" />
+              )}{' '}
+              Nivel Básico
             </span>
-            <span className="text-2xl font-extrabold text-slate-800">{stats.basicoCount}</span>
+            <span className="text-2xl font-extrabold text-slate-800">
+              {allowedLevels.includes('basico') ? stats.basicoCount : '🔒'}
+            </span>
           </div>
           <h4 className="font-bold text-slate-800 text-sm mt-3">Fase 1: Clasificación</h4>
           <p className="text-xs text-slate-500 mt-0.5">

@@ -35,11 +35,11 @@ export interface UserProfile {
   is_demo?: boolean;
 }
 
-// Jerarquía de niveles permitidos
+// Niveles permitidos por rol (compartimentado estricto por nivel)
 export const ROLE_HIERARCHY: Record<UserRole, DifficultyLevel[]> = {
   basico: ['basico'],
-  medio: ['basico', 'medio'],
-  dificil: ['basico', 'medio', 'dificil'],
+  medio: ['medio'],
+  dificil: ['dificil'],
   admin: ['basico', 'medio', 'dificil'],
 };
 
