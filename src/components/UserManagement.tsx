@@ -4,10 +4,8 @@ import { AuthService } from '../lib/supabase';
 import {
   Users,
   Search,
-  Shield,
   Check,
   Calendar,
-  Sparkles,
   Info,
 } from 'lucide-react';
 
