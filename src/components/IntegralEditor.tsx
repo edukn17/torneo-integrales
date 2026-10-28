@@ -67,9 +67,9 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
   const handlePhaseChange = (newPhase: TournamentPhase) => {
     setPhase(newPhase);
     if (newPhase === 'fase3_finales') {
-      setTimeLimitSeconds(300); // 5 min para Fase 3 según propuesta
+      setTimeLimitSeconds(300);
     } else {
-      setTimeLimitSeconds(600); // 10 min para Fase 2
+      setTimeLimitSeconds(600);
     }
   };
 
@@ -128,21 +128,21 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-espol max-w-4xl mx-auto animate-fadeIn">
+    <div className="bg-white border border-purple-100 rounded-3xl p-6 sm:p-8 shadow-fcnm max-w-4xl mx-auto animate-fadeIn">
       {/* Header del Editor */}
-      <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+      <div className="flex items-center justify-between pb-4 border-b border-purple-100">
         <div>
-          <h2 className="text-xl font-bold text-espol-navy flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-espol-bright" />
-            {initialIntegral ? 'Editar Ejercicio de Integral' : 'Registrar Nueva Integral'}
+          <h2 className="text-xl font-bold text-fcnm-dark flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-fcnm" />
+            {initialIntegral ? 'Editar Ejercicio de Integral' : 'Subir Nueva Integral al Banco'}
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Ingreso y curaduría de problemas para las fases del Torneo de Integrales ESPOL.
+            Ingreso y curaduría de problemas para el Torneo de Integrales MatEs.
           </p>
         </div>
         <button
           onClick={onCancel}
-          className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+          className="p-2 text-slate-400 hover:text-slate-600 hover:bg-purple-50 rounded-xl transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
@@ -167,7 +167,7 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
             placeholder="Ej: Integral racional con descomposición en fracciones simples"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-slate-50 focus:bg-white border border-slate-200 focus:border-espol-bright rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none transition-all shadow-sm"
+            className="w-full bg-slate-50 focus:bg-white border border-purple-100 focus:border-fcnm rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none transition-all shadow-sm"
           />
         </div>
 
@@ -185,7 +185,7 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
               placeholder="\int \frac{2x+2}{x^2+2x} \, dx"
               value={latexCode}
               onChange={(e) => setLatexCode(e.target.value)}
-              className="w-full bg-slate-900 text-emerald-400 font-mono text-sm border border-slate-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-espol-bright/30"
+              className="w-full bg-slate-900 text-emerald-400 font-mono text-sm border border-slate-700 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-fcnm/30"
             />
 
             {/* Barra de Atajos Matemáticos */}
@@ -205,7 +205,7 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
                   key={idx}
                   type="button"
                   onClick={() => insertSnippet(btn.code)}
-                  className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-xs font-mono text-slate-700 transition-colors"
+                  className="px-2.5 py-1 bg-purple-50 hover:bg-purple-100 border border-purple-200/60 rounded-lg text-xs font-mono text-fcnm font-bold transition-colors"
                 >
                   {btn.label}
                 </button>
@@ -217,11 +217,11 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
               Pizarra Virtual (Previsualización KaTeX)
             </label>
-            <div className="h-[124px] bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-center overflow-auto shadow-inner text-xl font-serif text-slate-900">
+            <div className="h-[124px] bg-purple-50/30 border border-purple-100 rounded-xl p-4 flex items-center justify-center overflow-auto shadow-inner text-xl font-serif text-slate-900">
               <MathView math={latexCode} block={true} />
             </div>
             <p className="text-[11px] text-slate-500 mt-1 flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Renderizado en tiempo real con sintaxis estándar de cálculo.
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Renderizado instantáneo en alta resolución.
             </p>
           </div>
         </div>
@@ -236,7 +236,7 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
               aria-label="Nivel de Dificultad"
               value={difficulty}
               onChange={(e) => setDifficulty(e.target.value as DifficultyLevel)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-espol-bright cursor-pointer"
+              className="w-full bg-slate-50 border border-purple-100 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-fcnm cursor-pointer"
             >
               {allowedLevels.includes('basico') && (
                 <option value="basico">Básico (Fase 1: Clasificación)</option>
@@ -258,7 +258,7 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
               aria-label="Fase del Torneo"
               value={phase}
               onChange={(e) => handlePhaseChange(e.target.value as TournamentPhase)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-espol-bright cursor-pointer"
+              className="w-full bg-slate-50 border border-purple-100 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-fcnm cursor-pointer"
             >
               <option value="fase1_clasificacion">Fase 1: Clasificación</option>
               <option value="fase2_eliminatorias">Fase 2: Eliminatorias</option>
@@ -279,7 +279,7 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
                 step={30}
                 value={timeLimitSeconds}
                 onChange={(e) => setTimeLimitSeconds(Number(e.target.value))}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-espol-bright"
+                className="w-full bg-slate-50 border border-purple-100 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-fcnm"
               />
               <span className="text-xs text-slate-500 whitespace-nowrap font-medium">
                 {Math.round(timeLimitSeconds / 60)} min
@@ -300,7 +300,7 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
               placeholder="\ln|x^2+2x| + C"
               value={solutionLatex}
               onChange={(e) => setSolutionLatex(e.target.value)}
-              className="w-full bg-slate-50 font-mono text-sm border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-espol-bright"
+              className="w-full bg-slate-50 font-mono text-sm border border-purple-100 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-fcnm"
             />
           </div>
 
@@ -308,7 +308,7 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
               Vista previa de la Solución
             </label>
-            <div className="h-[42px] bg-slate-50 border border-slate-200 rounded-xl px-3 flex items-center justify-center overflow-auto shadow-inner text-sm font-serif">
+            <div className="h-[42px] bg-purple-50/30 border border-purple-100 rounded-xl px-3 flex items-center justify-center overflow-auto shadow-inner text-sm font-serif">
               <MathView math={solutionLatex} block={false} />
             </div>
           </div>
@@ -324,7 +324,7 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
             placeholder={`\\ln|x| + \\ln|x+2| + C\n\\ln|x(x+2)| + C`}
             value={alternativeSolutionsStr}
             onChange={(e) => setAlternativeSolutionsStr(e.target.value)}
-            className="w-full bg-slate-50 font-mono text-xs border border-slate-200 rounded-xl p-3 text-slate-800 focus:outline-none focus:border-espol-bright"
+            className="w-full bg-slate-50 font-mono text-xs border border-purple-100 rounded-xl p-3 text-slate-800 focus:outline-none focus:border-fcnm"
           />
           <p className="text-[11px] text-slate-500 mt-1">
             Garantiza que el jurado valide al instante variantes algebraicas válidas en duelos rápidos.
@@ -342,7 +342,7 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
               placeholder="Ej: Michael Spivak - Cálculo, Cap. 18 / MIT Bee"
               value={sourceReference}
               onChange={(e) => setSourceReference(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-espol-bright"
+              className="w-full bg-slate-50 border border-purple-100 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-fcnm"
             />
           </div>
 
@@ -355,7 +355,7 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
               placeholder="sustitución, fracciones parciales, trigonométrica"
               value={tagsStr}
               onChange={(e) => setTagsStr(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-espol-bright"
+              className="w-full bg-slate-50 border border-purple-100 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-fcnm"
             />
           </div>
         </div>
@@ -370,23 +370,23 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
             placeholder="Aclaraciones de dominio, trucos requeridos, o advertencias de signos/constantes."
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-espol-bright"
+            className="w-full bg-slate-50 border border-purple-100 rounded-xl p-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-fcnm"
           />
         </div>
 
         {/* Botones de Acción */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-purple-100">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+            className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-800 hover:bg-purple-50 transition-colors"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 px-6 py-2.5 bg-espol-bright hover:bg-espol-blue text-white text-sm font-bold rounded-xl shadow-md transition-all duration-200"
+            className="flex items-center gap-2 px-6 py-2.5 bg-fcnm hover:bg-fcnm-hover text-white text-sm font-bold rounded-xl shadow-md transition-all duration-200"
           >
             <Save className="w-4 h-4" />
             {saving ? 'Guardando...' : initialIntegral ? 'Actualizar Integral' : 'Guardar en el Banco'}

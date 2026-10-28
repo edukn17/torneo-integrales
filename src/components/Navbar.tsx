@@ -7,7 +7,6 @@ import {
   PlusCircle,
   BookOpen,
   SlidersHorizontal,
-  GraduationCap,
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -30,26 +29,25 @@ export const Navbar: React.FC<NavbarProps> = ({
   totalIntegralsCount,
 }) => {
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-espol">
-      {/* Cintillo Superior Institucional ESPOL / FCNM */}
-      <div className="bg-espol-navy text-white text-xs px-4 sm:px-6 lg:px-8 py-1.5 flex items-center justify-between border-b-2 border-espol-gold">
+    <header className="sticky top-0 z-40 bg-white border-b border-purple-100 shadow-fcnm">
+      {/* Cintillo Superior Delgado en Morado FCNM */}
+      <div className="bg-fcnm-dark text-purple-200 text-xs px-4 sm:px-6 lg:px-8 py-1.5 flex items-center justify-between border-b border-fcnm/40">
         <div className="flex items-center gap-2 tracking-wide font-medium">
-          <GraduationCap className="w-3.5 h-3.5 text-espol-gold" />
-          <span className="font-bold text-espol-gold">ESPOL</span>
-          <span className="text-slate-400">|</span>
-          <span className="text-slate-200 hidden sm:inline">Facultad de Ciencias Naturales y Matemáticas (FCNM)</span>
-          <span className="text-slate-400 hidden sm:inline">•</span>
-          <span className="text-slate-300 hidden md:inline">Club MatEs &amp; AEFIEC &amp; IEEE-HKN</span>
+          <span className="font-extrabold text-espol-gold tracking-wider">MATES</span>
+          <span className="text-purple-400">|</span>
+          <span className="text-purple-200">Torneo de Integrales</span>
+          <span className="text-purple-400 hidden sm:inline">•</span>
+          <span className="text-purple-300/80 hidden sm:inline">AEFIEC &amp; IEEE-HKN Nu Zeta</span>
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={onOpenConfig}
-            className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-white/10 hover:bg-white/20 text-slate-200 transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-medium bg-white/10 hover:bg-white/20 text-purple-100 transition-colors"
           >
             <Database className="w-3 h-3 text-espol-gold" />
             <span className="hidden sm:inline">
-              {isSupabaseConnected ? 'Base de Datos: Conectada' : 'Modo: Local / Demo'}
+              {isSupabaseConnected ? 'Supabase Conectado' : 'Modo Demo / Local'}
             </span>
             <SlidersHorizontal className="w-2.5 h-2.5 opacity-70" />
           </button>
@@ -61,20 +59,20 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Brand & Título */}
           <div className="flex items-center gap-3.5">
-            <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-espol-navy via-espol-blue to-espol-bright flex items-center justify-center text-white font-serif text-2xl font-bold shadow-md shadow-espol-bright/20 border border-espol-navy/20">
+            <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-fcnm-dark via-fcnm to-fcnm-violet flex items-center justify-center text-white font-serif text-2xl font-bold shadow-md shadow-fcnm/30 border border-fcnm-border/40">
               ∫
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-lg sm:text-xl text-espol-navy tracking-tight">
+                <span className="font-extrabold text-lg sm:text-xl text-fcnm-dark tracking-tight">
                   Torneo de Integrales
                 </span>
-                <span className="text-[11px] font-bold tracking-wider uppercase px-2 py-0.5 rounded bg-espol-goldLight text-espol-navy border border-espol-gold/40">
-                  MatEs
+                <span className="text-[11px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-fcnm-light text-fcnm border border-fcnm-border">
+                  ESPOL
                 </span>
               </div>
               <p className="text-xs text-slate-500 font-medium">
-                Portal de Curación y Banco de Ejercicios
+                Plataforma de Curaduría y Banco de Problemas
               </p>
             </div>
           </div>
@@ -83,19 +81,19 @@ export const Navbar: React.FC<NavbarProps> = ({
           <nav className="flex items-center gap-1.5 sm:gap-2">
             <button
               onClick={() => onSelectTab('list')}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-200 ${
                 currentTab === 'list'
-                  ? 'bg-espol-bright text-white shadow-md shadow-espol-bright/30 translate-y-[-1px]'
-                  : 'text-slate-600 hover:text-espol-navy hover:bg-slate-100'
+                  ? 'bg-fcnm text-white shadow-md shadow-fcnm/30 translate-y-[-1px]'
+                  : 'text-slate-600 hover:text-fcnm hover:bg-purple-50'
               }`}
             >
               <BookOpen className="w-4 h-4" />
               <span>Banco</span>
               <span
-                className={`text-xs px-1.5 py-0.2 rounded-full font-bold ${
+                className={`text-xs px-2 py-0.5 rounded-full font-bold ${
                   currentTab === 'list'
                     ? 'bg-white/20 text-white'
-                    : 'bg-slate-200 text-slate-700'
+                    : 'bg-purple-100 text-fcnm'
                 }`}
               >
                 {totalIntegralsCount}
@@ -104,22 +102,22 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <button
               onClick={() => onSelectTab('editor')}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-200 ${
                 currentTab === 'editor'
-                  ? 'bg-espol-bright text-white shadow-md shadow-espol-bright/30 translate-y-[-1px]'
-                  : 'text-slate-600 hover:text-espol-navy hover:bg-slate-100'
+                  ? 'bg-fcnm text-white shadow-md shadow-fcnm/30 translate-y-[-1px]'
+                  : 'text-slate-600 hover:text-fcnm hover:bg-purple-50'
               }`}
             >
               <PlusCircle className="w-4 h-4" />
-              <span className="hidden sm:inline">Nueva Integral</span>
+              <span className="hidden sm:inline">Subir Integral</span>
             </button>
 
             <button
               onClick={() => onSelectTab('projector')}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-200 ${
                 currentTab === 'projector'
-                  ? 'bg-espol-navy text-white shadow-md shadow-espol-navy/30 translate-y-[-1px]'
-                  : 'text-slate-600 hover:text-espol-navy hover:bg-slate-100'
+                  ? 'bg-fcnm-dark text-white shadow-md shadow-fcnm-dark/40 translate-y-[-1px]'
+                  : 'text-slate-600 hover:text-fcnm hover:bg-purple-50'
               }`}
             >
               <MonitorPlay className="w-4 h-4 text-espol-gold" />
@@ -129,17 +127,17 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Selector de Rol de Colaborador */}
           <div className="flex items-center gap-2">
-            <div className="flex items-center bg-slate-100 border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-sm">
-              <Shield className="w-4 h-4 text-espol-navy mr-1.5" />
+            <div className="flex items-center bg-purple-50/70 border border-purple-200/80 rounded-xl px-3 py-1.5 shadow-sm">
+              <Shield className="w-4 h-4 text-fcnm mr-1.5" />
               <div className="flex flex-col text-left">
-                <span className="text-[10px] uppercase font-bold text-slate-500 leading-none">
+                <span className="text-[10px] uppercase font-bold text-fcnm-deep leading-none">
                   Rol Activo:
                 </span>
                 <select
                   aria-label="Seleccionar rol de colaborador"
                   value={user.role}
                   onChange={(e) => onChangeRole(e.target.value as UserRole)}
-                  className="bg-transparent text-xs font-bold text-espol-navy focus:outline-none cursor-pointer pr-1 leading-tight mt-0.5"
+                  className="bg-transparent text-xs font-bold text-fcnm-dark focus:outline-none cursor-pointer pr-1 leading-tight mt-0.5"
                 >
                   <option value="admin">Administrador (Todo)</option>
                   <option value="dificil">Nivel Difícil (D + M + B)</option>
