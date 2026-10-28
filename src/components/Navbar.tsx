@@ -48,20 +48,20 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Brand & Título */}
-          <div className="flex items-center gap-3.5">
-            <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-fcnm-dark via-fcnm to-fcnm-violet flex items-center justify-center text-white font-serif text-2xl font-bold shadow-md shadow-fcnm/30 border border-fcnm-border/40">
+          <div className="flex items-center gap-2.5 sm:gap-3.5">
+            <div className="h-9 w-9 sm:h-11 sm:w-11 rounded-xl bg-gradient-to-br from-fcnm-dark via-fcnm to-fcnm-violet flex items-center justify-center text-white font-serif text-xl sm:text-2xl font-bold shadow-md shadow-fcnm/30 border border-fcnm-border/40 shrink-0">
               ∫
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="font-extrabold text-lg sm:text-xl text-fcnm-dark tracking-tight">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="font-extrabold text-base sm:text-xl text-fcnm-dark tracking-tight">
                   Torneo de Integrales
                 </span>
-                <span className="text-[11px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-fcnm-light text-fcnm border border-fcnm-border">
+                <span className="text-[10px] sm:text-[11px] font-bold tracking-wider uppercase px-1.5 sm:px-2 py-0.5 rounded-full bg-fcnm-light text-fcnm border border-fcnm-border">
                   ESPOL
                 </span>
               </div>
-              <p className="text-xs text-slate-500 font-medium">
+              <p className="text-[11px] sm:text-xs text-slate-500 font-medium hidden sm:block">
                 Portal de Curación y Banco de Ejercicios
               </p>
             </div>
@@ -69,9 +69,9 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Si el usuario ha iniciado sesión: Mostrar pestañas de trabajo */}
           {user ? (
-            <div className="flex items-center gap-3">
-              {/* Botones de Navegación Centrales */}
-              <nav className="flex items-center gap-1.5 sm:gap-2">
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Botones de Navegación Centrales (Desktop) */}
+              <nav className="hidden md:flex items-center gap-1.5 sm:gap-2">
                 <button
                   onClick={() => onSelectTab('list')}
                   className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-200 ${
@@ -102,7 +102,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   }`}
                 >
                   <PlusCircle className="w-4 h-4" />
-                  <span className="hidden sm:inline">Subir Integral</span>
+                  <span>Subir Integral</span>
                 </button>
 
                 {/* Pestaña de Gestión de Colaboradores exclusiva para Admin */}
@@ -117,13 +117,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                     title="Administrar roles de colaboradores"
                   >
                     <Users className="w-4 h-4" />
-                    <span className="hidden sm:inline">Colaboradores</span>
+                    <span>Colaboradores</span>
                   </button>
                 )}
               </nav>
 
               {/* Carnet de Usuario y Rol */}
-              <div className="flex items-center gap-2 pl-2 border-l border-purple-100">
+              <div className="flex items-center gap-2 sm:pl-2 sm:border-l sm:border-purple-100">
+                {/* Desktop User Info */}
                 <div className="flex flex-col text-right hidden md:block">
                   <span className="text-xs font-bold text-slate-800 leading-tight">
                     {user.full_name || user.email}
@@ -150,6 +151,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </div>
                 </div>
 
+                {/* Mobile Compact User Badge */}
+                <div className="md:hidden flex items-center gap-1.5">
+                  <span
+                    className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border ${
+                      user.role === 'admin'
+                        ? 'bg-purple-100 text-purple-900 border-purple-300'
+                        : user.role === 'dificil'
+                        ? 'bg-fcnm-light text-fcnm border-fcnm-border'
+                        : user.role === 'medio'
+                        ? 'bg-amber-50 text-amber-800 border-amber-200'
+                        : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                    }`}
+                  >
+                    {user.role === 'admin' ? 'Admin' : user.role}
+                  </span>
+                </div>
+
                 <button
                   onClick={onSignOut}
                   className="flex items-center gap-1.5 p-2 rounded-xl text-xs font-bold text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
@@ -161,25 +179,69 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           ) : (
             /* Si no ha iniciado sesión: Mostrar botones de Acceso */
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-1.5 sm:gap-2.5">
               <button
                 onClick={onOpenLogin}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-fcnm hover:bg-purple-50 transition-colors"
+                className="flex items-center gap-1 px-2.5 sm:px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-fcnm hover:bg-purple-50 transition-colors"
               >
                 <LogIn className="w-3.5 h-3.5" />
-                <span>Iniciar Sesión</span>
+                <span className="hidden xs:inline">Iniciar Sesión</span>
+                <span className="xs:hidden">Entrar</span>
               </button>
 
               <button
                 onClick={onOpenRegister}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-fcnm hover:bg-fcnm-hover text-white shadow-sm transition-all"
+                className="flex items-center gap-1 px-3 sm:px-4 py-2 rounded-xl text-xs font-bold bg-fcnm hover:bg-fcnm-hover text-white shadow-sm transition-all"
               >
-                <span>Registrarme</span>
+                <span className="hidden xs:inline">Registrarme</span>
+                <span className="xs:hidden">Registro</span>
               </button>
             </div>
           )}
         </div>
       </div>
+
+      {/* Barra de Navegación Inferior Fija para Móviles (Solo con sesión iniciada) */}
+      {user && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-purple-100 px-3 py-1.5 flex items-center justify-around shadow-[0_-4px_20px_rgba(107,33,168,0.08)]">
+          <button
+            onClick={() => onSelectTab('list')}
+            className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl text-[11px] font-bold transition-all ${
+              currentTab === 'list' ? 'text-fcnm' : 'text-slate-400 hover:text-slate-600'
+            }`}
+          >
+            <div className="relative">
+              <BookOpen className="w-5 h-5" />
+              <span className="absolute -top-1 -right-2 text-[9px] px-1 py-0.1 bg-fcnm text-white rounded-full font-bold">
+                {totalIntegralsCount}
+              </span>
+            </div>
+            <span>Banco</span>
+          </button>
+
+          <button
+            onClick={() => onSelectTab('editor')}
+            className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl text-[11px] font-bold transition-all ${
+              currentTab === 'editor' ? 'text-fcnm' : 'text-slate-400 hover:text-slate-600'
+            }`}
+          >
+            <PlusCircle className="w-5 h-5" />
+            <span>Subir</span>
+          </button>
+
+          {user.role === 'admin' && (
+            <button
+              onClick={() => onSelectTab('users')}
+              className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl text-[11px] font-bold transition-all ${
+                currentTab === 'users' ? 'text-fcnm' : 'text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              <Users className="w-5 h-5" />
+              <span>Colaboradores</span>
+            </button>
+          )}
+        </div>
+      )}
     </header>
   );
 };

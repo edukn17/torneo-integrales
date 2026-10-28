@@ -328,26 +328,19 @@ export const AuthService = {
 
   async signUp(email: string, password: string, fullName: string, matricula: string): Promise<{ user: UserProfile | null; error: string | null }> {
     const client = getSupabaseClient();
+    const cleanEmail = email.trim().toLowerCase();
     const cleanMatricula = matricula.trim();
 
     if (!client) {
-      // Mock signup
-      const newMockUser: UserProfile = {
-        id: 'mock-user-' + Date.now(),
-        email: email.trim(),
-        full_name: fullName.trim() || 'Nuevo Colaborador',
-        matricula: cleanMatricula,
-        role: 'basico',
-        created_at: new Date().toISOString(),
-        is_demo: true,
+      return {
+        user: null,
+        error: 'No hay conexión con la base de datos de Supabase en este dispositivo. Por favor verifica las credenciales de despliegue.',
       };
-      this.setStoredProfile(newMockUser);
-      return { user: newMockUser, error: null };
     }
 
     try {
       const { data, error } = await client.auth.signUp({
-        email: email.trim(),
+        email: cleanEmail,
         password: password,
         options: {
           data: {
@@ -385,15 +378,22 @@ export const AuthService = {
 
   async signIn(email: string, password: string): Promise<{ user: UserProfile | null; error: string | null }> {
     const client = getSupabaseClient();
+    const cleanEmail = email.trim().toLowerCase();
 
     if (!client) {
       const stored = this.getStoredProfile();
+      if (!stored) {
+        return {
+          user: null,
+          error: 'No hay conexión con la base de datos de Supabase en este dispositivo.',
+        };
+      }
       return { user: stored, error: null };
     }
 
     try {
       const { data, error } = await client.auth.signInWithPassword({
-        email: email.trim(),
+        email: cleanEmail,
         password: password,
       });
 

@@ -110,7 +110,7 @@ export function App() {
       />
 
       {/* Contenido Principal */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fadeIn">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-24 md:pb-8 animate-fadeIn">
         {/* Si el usuario no ha iniciado sesión, mostrar la landing informativa */}
         {!user ? (
           <LandingHero

@@ -41,7 +41,7 @@ export const MathView: React.FC<MathViewProps> = ({ math, block = true, classNam
 
   return (
     <div
-      className={`math-render overflow-x-auto py-1 max-w-full ${block ? 'my-2 flex justify-center' : 'inline'} ${className}`}
+      className={`math-render overflow-x-auto py-1 max-w-full touch-pan-x ${block ? 'my-2 text-center' : 'inline'} ${className}`}
       dangerouslySetInnerHTML={{ __html: renderedHtml.html }}
     />
   );

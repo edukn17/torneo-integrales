@@ -54,9 +54,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     setLoading(true);
 
+    const cleanEmail = email.trim().toLowerCase();
+
     try {
       if (tab === 'login') {
-        const { user, error } = await AuthService.signIn(email, password);
+        const { user, error } = await AuthService.signIn(cleanEmail, password);
         if (error) {
           setErrorMsg(error);
           return;
@@ -64,9 +66,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         if (user) {
           onAuthSuccess(user);
           onClose();
+        } else {
+          setErrorMsg('No se pudo iniciar sesión. Verifica tu conexión a internet o tus credenciales.');
         }
       } else {
-        const { user, error } = await AuthService.signUp(email, password, fullName, matricula);
+        const { user, error } = await AuthService.signUp(cleanEmail, password, fullName, matricula);
         if (error) {
           setErrorMsg(error);
           return;
@@ -77,6 +81,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             onAuthSuccess(user);
             onClose();
           }, 1200);
+        } else {
+          setErrorMsg('No se pudo completar el registro. Intenta de nuevo.');
         }
       }
     } catch (err: unknown) {
@@ -182,6 +188,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <input
                     type="text"
                     required
+                    inputMode="numeric"
                     maxLength={9}
                     pattern="[0-9]{9}"
                     placeholder="Ej: 202204589"
@@ -209,6 +216,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <input
                 type="email"
                 required
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck="false"
+                inputMode="email"
                 placeholder="colaborador@espol.edu.ec"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -227,6 +238,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 type="password"
                 required
                 minLength={6}
+                autoCapitalize="none"
                 placeholder="Mínimo 6 caracteres"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
