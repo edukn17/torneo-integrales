@@ -18,6 +18,7 @@ export const MathView: React.FC<MathViewProps> = ({ math, block = true, classNam
         displayMode: block,
         throwOnError: false,
         output: 'htmlAndMathml',
+        trust: false, // Deshabilita macros externas potencialmente inseguras
       });
       return { html, hasError: false, errorMsg: '' };
     } catch (err: unknown) {
