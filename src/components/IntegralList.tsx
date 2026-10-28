@@ -17,8 +17,6 @@ import {
   Lock,
   Unlock,
   PlusCircle,
-  FileText,
-  AlertCircle,
 } from 'lucide-react';
 
 interface IntegralListProps {
@@ -38,7 +36,6 @@ export const IntegralList: React.FC<IntegralListProps> = ({
 }) => {
   const [search, setSearch] = useState('');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('todos');
-  const [selectedPhase, setSelectedPhase] = useState<string>('todas');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [revealedSolutions, setRevealedSolutions] = useState<Record<string, boolean>>({});
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -58,12 +55,7 @@ export const IntegralList: React.FC<IntegralListProps> = ({
         return false;
       }
 
-      // 3. Filtro de fase
-      if (selectedPhase !== 'todas' && item.phase !== selectedPhase) {
-        return false;
-      }
-
-      // 4. Búsqueda de texto
+      // 3. Búsqueda de texto
       if (search.trim()) {
         const query = search.toLowerCase();
         const inTitle = item.title.toLowerCase().includes(query);
@@ -75,7 +67,7 @@ export const IntegralList: React.FC<IntegralListProps> = ({
 
       return true;
     });
-  }, [integrals, allowedLevels, selectedDifficulty, selectedPhase, search]);
+  }, [integrals, allowedLevels, selectedDifficulty, search]);
 
   const toggleSolution = (id: string) => {
     setRevealedSolutions((prev) => ({ ...prev, [id]: !prev[id] }));

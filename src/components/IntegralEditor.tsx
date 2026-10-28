@@ -7,9 +7,6 @@ import {
   X,
   CheckCircle2,
   AlertCircle,
-  HelpCircle,
-  Clock,
-  BookOpen,
 } from 'lucide-react';
 
 interface IntegralEditorProps {

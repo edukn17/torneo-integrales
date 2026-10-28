@@ -8,7 +8,6 @@ import {
   BookOpen,
   SlidersHorizontal,
   GraduationCap,
-  Sparkles,
 } from 'lucide-react';
 
 interface NavbarProps {

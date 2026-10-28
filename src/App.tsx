@@ -7,7 +7,7 @@ import { IntegralEditor } from './components/IntegralEditor';
 import { ProjectorMode } from './components/ProjectorMode';
 import { SupabaseGuideModal } from './components/SupabaseGuideModal';
 import confetti from 'canvas-confetti';
-import { Calendar, Award, GraduationCap, Building2 } from 'lucide-react';
+import { Calendar, Award, Building2 } from 'lucide-react';
 
 export function App() {
   const [user, setUser] = useState<UserProfile>(() => AuthService.getStoredProfile());

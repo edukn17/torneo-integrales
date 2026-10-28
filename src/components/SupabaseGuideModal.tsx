@@ -6,7 +6,6 @@ import {
   Check,
   ExternalLink,
   RotateCcw,
-  GraduationCap,
 } from 'lucide-react';
 import {
   getSupabaseCredentials,
