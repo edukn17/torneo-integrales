@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Database, Check, ExternalLink, RotateCcw } from 'lucide-react';
+import { X, Database, Check } from 'lucide-react';
 import { getSupabaseCredentials, saveSupabaseCredentials } from '../lib/supabase';
 
 interface SupabaseConfigModalProps {
