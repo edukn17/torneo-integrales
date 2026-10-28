@@ -72,6 +72,7 @@ CREATE TRIGGER on_auth_user_created
 
 -- Políticas RLS para perfiles
 DROP POLICY IF EXISTS "Los usuarios pueden ver su propio perfil y perfiles publicos" ON public.profiles;
+DROP POLICY IF EXISTS "Lectura de perfiles por colaboradores autenticados" ON public.profiles;
 CREATE POLICY "Lectura de perfiles por colaboradores autenticados"
   ON public.profiles FOR SELECT
   TO authenticated
@@ -82,7 +83,7 @@ DROP POLICY IF EXISTS "Los usuarios pueden actualizar su propio perfil" ON publi
 DROP POLICY IF EXISTS "Usuarios actualizan sus propios datos pero no su rol" ON public.profiles;
 DROP POLICY IF EXISTS "Solo admins actualizan roles" ON public.profiles;
 
--- Política 1: El usuario puede modificar su nombre o matrícula, pero NUNCA su rol
+-- Política 1: El colaborador puede modificar su nombre o matrícula, pero NUNCA su rol
 CREATE POLICY "Usuarios actualizan sus propios datos pero no su rol"
   ON public.profiles FOR UPDATE
   TO authenticated
@@ -120,6 +121,8 @@ CREATE TABLE IF NOT EXISTS public.integrales (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
+ALTER TABLE public.integrales ALTER COLUMN created_by SET DEFAULT auth.uid();
+
 -- Restricciones de integridad en integrales
 ALTER TABLE public.integrales
   DROP CONSTRAINT IF EXISTS time_limit_check,
@@ -128,6 +131,31 @@ ALTER TABLE public.integrales
 ALTER TABLE public.integrales
   DROP CONSTRAINT IF EXISTS latex_length_check,
   ADD CONSTRAINT latex_length_check CHECK (length(latex_code) <= 10000 AND length(solution_latex) <= 15000);
+
+-- Trigger para garantizar created_by y status = 'propuesta' para no-admins
+CREATE OR REPLACE FUNCTION public.handle_integral_status()
+RETURNS TRIGGER
+SECURITY DEFINER
+SET search_path = public, pg_temp
+LANGUAGE plpgsql AS $$
+BEGIN
+  IF NEW.created_by IS NULL THEN
+    NEW.created_by := auth.uid();
+  END IF;
+
+  -- Si no es admin, siempre queda como propuesta para revisión del jurado/admin
+  IF public.current_user_role() <> 'admin' THEN
+    NEW.status := 'propuesta';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_handle_integral_status ON public.integrales;
+CREATE TRIGGER trg_handle_integral_status
+  BEFORE INSERT ON public.integrales
+  FOR EACH ROW EXECUTE FUNCTION public.handle_integral_status();
 
 ALTER TABLE public.integrales ENABLE ROW LEVEL SECURITY;
 
@@ -145,14 +173,13 @@ CREATE POLICY "Lectura jerarquica de integrales segun rol del colaborador"
     OR (public.current_user_role() = 'basico' AND difficulty_level = 'basico')
   );
 
--- INSERT: Registro seguro (fuerza created_by = usuario autenticado y status = 'propuesta' a menos que sea admin)
+-- INSERT: Registro según nivel permitido (básico sube básico, medio sube medio/básico, difícil sube todos)
 DROP POLICY IF EXISTS "Colaboradores pueden registrar integrales" ON public.integrales;
 CREATE POLICY "Colaboradores pueden registrar integrales"
   ON public.integrales FOR INSERT
   TO authenticated
   WITH CHECK (
-    created_by = auth.uid()
-    AND (public.current_user_role() = 'admin' OR status = 'propuesta')
+    (created_by IS NULL OR created_by = auth.uid())
     AND (
       public.current_user_role() = 'admin'
       OR (public.current_user_role() = 'dificil' AND difficulty_level IN ('basico', 'medio', 'dificil'))
@@ -161,25 +188,31 @@ CREATE POLICY "Colaboradores pueden registrar integrales"
     )
   );
 
--- UPDATE: Edición restringida
+-- UPDATE: Admins pueden aprobar/rechazar o editar cualquier integral
 DROP POLICY IF EXISTS "Colaboradores pueden editar sus propias propuestas o admins" ON public.integrales;
-CREATE POLICY "Colaboradores pueden editar sus propias propuestas o admins"
+DROP POLICY IF EXISTS "Admins pueden actualizar cualquier integral" ON public.integrales;
+DROP POLICY IF EXISTS "Colaboradores pueden editar sus propias propuestas" ON public.integrales;
+
+CREATE POLICY "Admins pueden actualizar cualquier integral"
+  ON public.integrales FOR UPDATE
+  TO authenticated
+  USING (public.current_user_role() = 'admin')
+  WITH CHECK (public.current_user_role() = 'admin');
+
+CREATE POLICY "Colaboradores pueden editar sus propias propuestas"
   ON public.integrales FOR UPDATE
   TO authenticated
   USING (
-    public.current_user_role() = 'admin'
-    OR (created_by = auth.uid() AND status = 'propuesta')
+    created_by = auth.uid() 
+    AND status = 'propuesta'
   )
   WITH CHECK (
-    public.current_user_role() = 'admin'
-    OR (
-      created_by = auth.uid() 
-      AND status = 'propuesta'
-      AND (
-        (public.current_user_role() = 'dificil' AND difficulty_level IN ('basico', 'medio', 'dificil'))
-        OR (public.current_user_role() = 'medio' AND difficulty_level IN ('basico', 'medio'))
-        OR (public.current_user_role() = 'basico' AND difficulty_level = 'basico')
-      )
+    created_by = auth.uid() 
+    AND status = 'propuesta'
+    AND (
+      (public.current_user_role() = 'dificil' AND difficulty_level IN ('basico', 'medio', 'dificil'))
+      OR (public.current_user_role() = 'medio' AND difficulty_level IN ('basico', 'medio'))
+      OR (public.current_user_role() = 'basico' AND difficulty_level = 'basico')
     )
   );
 

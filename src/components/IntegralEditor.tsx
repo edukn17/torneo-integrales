@@ -106,6 +106,10 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
         .map((t) => t.trim())
         .filter(Boolean);
 
+      const targetStatus: ExerciseStatus = userRole === 'admin' 
+        ? (initialIntegral?.status || 'aprobada')
+        : 'propuesta';
+
       await onSave({
         title: title.trim(),
         latex_code: latexCode.trim(),
@@ -117,11 +121,12 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
         source_reference: sourceReference.trim(),
         notes: notes.trim(),
         time_limit_seconds: Number(timeLimitSeconds) || 600,
-        status: 'aprobada',
-        created_by_name: 'Colaborador MatEs',
+        status: targetStatus,
+        created_by_name: initialIntegral?.created_by_name || 'Colaborador MatEs',
       });
-    } catch (err) {
-      setErrorMsg('Error al guardar la integral. Intenta nuevamente.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al guardar la integral en la base de datos.';
+      setErrorMsg(msg);
     } finally {
       setSaving(false);
     }
@@ -147,6 +152,17 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
           <X className="w-5 h-5" />
         </button>
       </div>
+
+      {userRole !== 'admin' && (
+        <div className="mt-4 p-3.5 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-2.5 text-xs text-amber-900">
+          <span className="font-bold text-amber-700 uppercase tracking-wider text-[10px] px-2 py-0.5 bg-amber-100 rounded-md shrink-0">
+            Flujo de Aprobación
+          </span>
+          <span>
+            Tu ejercicio se enviará como propuesta. El administrador del torneo revisará la solución y aprobará o rechazará el ejercicio.
+          </span>
+        </div>
+      )}
 
       {errorMsg && (
         <div className="mt-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-2">
@@ -389,7 +405,13 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
             className="flex items-center gap-2 px-6 py-2.5 bg-fcnm hover:bg-fcnm-hover text-white text-sm font-bold rounded-xl shadow-md transition-all duration-200"
           >
             <Save className="w-4 h-4" />
-            {saving ? 'Guardando...' : initialIntegral ? 'Actualizar Integral' : 'Guardar en el Banco'}
+            {saving
+              ? 'Guardando...'
+              : initialIntegral
+              ? 'Actualizar Integral'
+              : userRole === 'admin'
+              ? 'Guardar y Publicar en el Banco'
+              : 'Subir para Revisión'}
           </button>
         </div>
       </form>

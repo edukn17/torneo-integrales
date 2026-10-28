@@ -153,18 +153,26 @@ export const IntegralService = {
     const client = getSupabaseClient();
 
     if (client) {
-      try {
-        const { data, error } = await client
-          .from('integrales')
-          .insert([integral])
-          .select()
-          .single();
+      const { data: authData } = await client.auth.getUser();
+      const currentUserId = authData?.user?.id || integral.created_by;
 
-        if (error) throw error;
-        return data as Integral;
-      } catch (err) {
-        console.warn('Fallo al insertar en Supabase, guardando en local:', err);
+      const payload = {
+        ...integral,
+        created_by: currentUserId,
+        created_by_name: integral.created_by_name || authData?.user?.user_metadata?.full_name || 'Colaborador',
+      };
+
+      const { data, error } = await client
+        .from('integrales')
+        .insert([payload])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error insertando integral en Supabase:', error);
+        throw error;
       }
+      return data as Integral;
     }
 
     const newIntegral: Integral = {
@@ -179,23 +187,43 @@ export const IntegralService = {
     return newIntegral;
   },
 
+  async updateIntegralStatus(id: string, status: ExerciseStatus): Promise<void> {
+    const client = getSupabaseClient();
+
+    if (client) {
+      const { error } = await client
+        .from('integrales')
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error actualizando estado en Supabase:', error);
+        throw error;
+      }
+      return;
+    }
+
+    const current = getStoredMockIntegrals();
+    const updated = current.map((item) => (item.id === id ? { ...item, status } : item));
+    saveStoredMockIntegrals(updated);
+  },
+
   async updateIntegral(id: string, updates: Partial<Integral>): Promise<Integral> {
     const client = getSupabaseClient();
 
     if (client) {
-      try {
-        const { data, error } = await client
-          .from('integrales')
-          .update(updates)
-          .eq('id', id)
-          .select()
-          .single();
+      const { data, error } = await client
+        .from('integrales')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
 
-        if (error) throw error;
-        return data as Integral;
-      } catch (err) {
-        console.warn('Fallo al actualizar en Supabase, actualizando en local:', err);
+      if (error) {
+        console.error('Error actualizando integral en Supabase:', error);
+        throw error;
       }
+      return data as Integral;
     }
 
     const current = getStoredMockIntegrals();

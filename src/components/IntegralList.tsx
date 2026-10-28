@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Integral, UserRole, LEVEL_LABELS, PHASE_LABELS, ROLE_HIERARCHY } from '../types';
+import { Integral, UserRole, ExerciseStatus, LEVEL_LABELS, PHASE_LABELS, ROLE_HIERARCHY } from '../types';
 import { MathView } from './MathView';
 import {
   Search,
@@ -17,6 +17,8 @@ import {
   Lock,
   Unlock,
   PlusCircle,
+  CheckCircle2,
+  XCircle,
 } from 'lucide-react';
 
 interface IntegralListProps {
@@ -25,6 +27,7 @@ interface IntegralListProps {
   onEdit: (integral: Integral) => void;
   onDelete: (id: string) => void;
   onAddNew: () => void;
+  onUpdateStatus?: (id: string, status: ExerciseStatus) => Promise<void>;
 }
 
 export const IntegralList: React.FC<IntegralListProps> = ({
@@ -33,9 +36,11 @@ export const IntegralList: React.FC<IntegralListProps> = ({
   onEdit,
   onDelete,
   onAddNew,
+  onUpdateStatus,
 }) => {
   const [search, setSearch] = useState('');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('todos');
+  const [selectedStatus, setSelectedStatus] = useState<string>('todos');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [revealedSolutions, setRevealedSolutions] = useState<Record<string, boolean>>({});
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -55,9 +60,25 @@ export const IntegralList: React.FC<IntegralListProps> = ({
         return false;
       }
 
-      // 3. Búsqueda de texto
+      // 3. Filtro de estado
+      if (selectedStatus !== 'todos' && item.status !== selectedStatus) {
+        return false;
+      }
+
+      // 4. Búsqueda de texto
       if (search.trim()) {
         const query = search.toLowerCase();
+        const inTitle = item.title.toLowerCase().includes(query);
+        const inLatex = item.latex_code.toLowerCase().includes(query);
+        const inTags = item.tags.some((t) => t.toLowerCase().includes(query));
+        const inSource = item.source_reference.toLowerCase().includes(query);
+        const inAuthor = (item.created_by_name || '').toLowerCase().includes(query);
+        return inTitle || inLatex || inTags || inSource || inAuthor;
+      }
+
+      return true;
+    });
+  }, [integrals, allowedLevels, selectedDifficulty, selectedStatus, search]);
         const inTitle = item.title.toLowerCase().includes(query);
         const inLatex = item.latex_code.toLowerCase().includes(query);
         const inTags = item.tags.some((t) => t.toLowerCase().includes(query));
@@ -292,6 +313,56 @@ export const IntegralList: React.FC<IntegralListProps> = ({
             </button>
           </div>
         </div>
+
+        {/* Filtro secundario de Estado de Aprobación */}
+        <div className="flex items-center gap-1.5 pt-3 border-t border-purple-100 flex-wrap">
+          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mr-1">
+            Estado:
+          </span>
+          <button
+            onClick={() => setSelectedStatus('todos')}
+            className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+              selectedStatus === 'todos'
+                ? 'bg-purple-100 text-fcnm font-bold'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            Todas ({integrals.length})
+          </button>
+          <button
+            onClick={() => setSelectedStatus('aprobada')}
+            className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
+              selectedStatus === 'aprobada'
+                ? 'bg-emerald-100 text-emerald-800 font-bold'
+                : 'text-slate-500 hover:text-emerald-700'
+            }`}
+          >
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Aprobadas (
+            {integrals.filter((i) => i.status === 'aprobada').length})
+          </button>
+          <button
+            onClick={() => setSelectedStatus('propuesta')}
+            className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
+              selectedStatus === 'propuesta'
+                ? 'bg-amber-100 text-amber-900 font-bold'
+                : 'text-slate-500 hover:text-amber-700'
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5 text-amber-600" /> En Revisión (
+            {integrals.filter((i) => i.status === 'propuesta').length})
+          </button>
+          <button
+            onClick={() => setSelectedStatus('rechazada')}
+            className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
+              selectedStatus === 'rechazada'
+                ? 'bg-rose-100 text-rose-800 font-bold'
+                : 'text-slate-500 hover:text-rose-700'
+            }`}
+          >
+            <XCircle className="w-3.5 h-3.5 text-rose-600" /> Rechazadas (
+            {integrals.filter((i) => i.status === 'rechazada').length})
+          </button>
+        </div>
       </div>
 
       {/* Grid de Ejercicios */}
@@ -333,6 +404,21 @@ export const IntegralList: React.FC<IntegralListProps> = ({
                       <span className="text-[11px] text-purple-700 font-semibold bg-purple-50 px-2 py-0.5 rounded-md border border-purple-100">
                         {PHASE_LABELS[integral.phase].split(':')[0]}
                       </span>
+                      {integral.status === 'propuesta' && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-300 flex items-center gap-1">
+                          <Clock className="w-2.5 h-2.5 text-amber-600" /> En Revisión
+                        </span>
+                      )}
+                      {integral.status === 'aprobada' && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                          <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" /> Aprobada
+                        </span>
+                      )}
+                      {integral.status === 'rechazada' && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-800 border border-rose-300 flex items-center gap-1">
+                          <XCircle className="w-2.5 h-2.5 text-rose-600" /> Rechazada
+                        </span>
+                      )}
                     </div>
 
                     {/* Acciones de Tarjeta */}
@@ -375,6 +461,11 @@ export const IntegralList: React.FC<IntegralListProps> = ({
                   <h3 className="font-bold text-slate-800 text-sm leading-snug">
                     {integral.title}
                   </h3>
+                  {integral.created_by_name && (
+                    <span className="text-[11px] text-purple-700/80 font-medium block mt-0.5">
+                      Subida por: {integral.created_by_name}
+                    </span>
+                  )}
 
                   {/* Lienzo KaTeX */}
                   <div className="mt-3.5 mb-3.5 p-4 rounded-xl bg-purple-50/30 border border-purple-100 flex items-center justify-center min-h-[95px] text-xl font-serif text-slate-900 group-hover:bg-purple-50/60 group-hover:border-fcnm-border transition-all">
@@ -456,6 +547,41 @@ export const IntegralList: React.FC<IntegralListProps> = ({
                           {integral.notes}
                         </div>
                       )}
+                    </div>
+                  )}
+                  {/* Panel de Aprobación para Administradores */}
+                  {userRole === 'admin' && onUpdateStatus && (
+                    <div className="mt-3 pt-2.5 border-t border-purple-100 flex items-center justify-between gap-2 flex-wrap bg-purple-50/50 p-2.5 rounded-xl">
+                      <span className="text-[11px] font-bold text-slate-700">Decisión Admin:</span>
+                      <div className="flex items-center gap-1.5">
+                        {integral.status !== 'aprobada' && (
+                          <button
+                            onClick={() => onUpdateStatus(integral.id, 'aprobada')}
+                            className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition-all flex items-center gap-1"
+                            title="Aprobar esta integral para el torneo"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Aprobar
+                          </button>
+                        )}
+                        {integral.status !== 'rechazada' && (
+                          <button
+                            onClick={() => onUpdateStatus(integral.id, 'rechazada')}
+                            className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold rounded-lg transition-all flex items-center gap-1"
+                            title="Rechazar esta integral"
+                          >
+                            <XCircle className="w-3.5 h-3.5" /> Rechazar
+                          </button>
+                        )}
+                        {integral.status !== 'propuesta' && (
+                          <button
+                            onClick={() => onUpdateStatus(integral.id, 'propuesta')}
+                            className="text-[11px] text-slate-400 hover:text-slate-600 underline ml-1"
+                            title="Volver a poner en revisión"
+                          >
+                            Reabrir
+                          </button>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>

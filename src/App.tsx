@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Integral, UserProfile, UserRole } from './types';
+import { Integral, UserProfile, UserRole, ExerciseStatus } from './types';
 import { IntegralService, AuthService } from './lib/supabase';
 import { Navbar } from './components/Navbar';
 import { LandingHero } from './components/LandingHero';
@@ -59,19 +59,39 @@ export function App() {
 
   const handleSaveIntegral = async (data: Omit<Integral, 'id' | 'created_at'>) => {
     if (!user) return;
-    if (editingIntegral) {
-      await IntegralService.updateIntegral(editingIntegral.id, data);
-    } else {
-      await IntegralService.createIntegral(data);
-      confetti({
-        particleCount: 50,
-        spread: 60,
-        origin: { y: 0.8 },
-      });
+    try {
+      if (editingIntegral) {
+        await IntegralService.updateIntegral(editingIntegral.id, data);
+      } else {
+        await IntegralService.createIntegral({
+          ...data,
+          created_by: user.id,
+          created_by_name: user.full_name || user.email || 'Colaborador',
+        });
+        confetti({
+          particleCount: 50,
+          spread: 60,
+          origin: { y: 0.8 },
+        });
+      }
+      setEditingIntegral(null);
+      setCurrentTab('list');
+      await loadIntegrals(user.role);
+    } catch (err: unknown) {
+      console.error('Error guardando integral:', err);
+      throw err;
     }
-    setEditingIntegral(null);
-    setCurrentTab('list');
-    await loadIntegrals(user.role);
+  };
+
+  const handleUpdateStatus = async (id: string, status: ExerciseStatus) => {
+    if (!user) return;
+    try {
+      await IntegralService.updateIntegralStatus(id, status);
+      await loadIntegrals(user.role);
+    } catch (err) {
+      console.error('Error actualizando estado de integral:', err);
+      alert('Error al actualizar el estado de la integral. Verifica tus permisos de administrador.');
+    }
   };
 
   const handleDeleteIntegral = async (id: string) => {
@@ -143,6 +163,7 @@ export function App() {
                       setEditingIntegral(null);
                       setCurrentTab('editor');
                     }}
+                    onUpdateStatus={handleUpdateStatus}
                   />
                 )}
               </div>
