@@ -59,43 +59,55 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
       {/* Tarjetas Informativas de las 3 Fases del Torneo */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
         {/* Fase 1 */}
-        <div className="bg-white rounded-3xl p-6 border border-purple-100 shadow-fcnm hover:shadow-fcnm-hover transition-all space-y-3">
-          <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center font-bold text-sm">
-            Fase 1
+        <div className="bg-white rounded-3xl p-6 border border-purple-100 shadow-fcnm hover:shadow-fcnm-hover transition-all space-y-3 flex flex-col justify-between">
+          <div className="space-y-3">
+            <div>
+              <span className="inline-flex items-center px-3.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-extrabold text-xs uppercase tracking-wider">
+                Fase 1
+              </span>
+            </div>
+            <h3 className="font-bold text-slate-800 text-base">Clasificación Escrita</h3>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Evaluación masiva en aulas con un tiempo límite de 1h30. Quienes resuelvan al menos 10 integrales de dificultad baja clasifican a la siguiente ronda.
+            </p>
           </div>
-          <h3 className="font-bold text-slate-800 text-base">Clasificación Escrita</h3>
-          <p className="text-xs text-slate-500 leading-relaxed">
-            Evaluación masiva en aulas con un tiempo límite de 1h30. Quienes resuelvan al menos 10 integrales de dificultad baja clasifican a la siguiente ronda.
-          </p>
-          <div className="pt-2 text-[11px] font-semibold text-emerald-700 flex items-center gap-1.5">
+          <div className="pt-2 text-[11px] font-semibold text-emerald-700 flex items-center gap-1.5 border-t border-slate-100">
             <CheckCircle2 className="w-3.5 h-3.5" /> Nivel de Ejercicios: Básico
           </div>
         </div>
 
         {/* Fase 2 */}
-        <div className="bg-white rounded-3xl p-6 border border-purple-100 shadow-fcnm hover:shadow-fcnm-hover transition-all space-y-3">
-          <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-800 border border-amber-200 flex items-center justify-center font-bold text-sm">
-            Fase 2
+        <div className="bg-white rounded-3xl p-6 border border-purple-100 shadow-fcnm hover:shadow-fcnm-hover transition-all space-y-3 flex flex-col justify-between">
+          <div className="space-y-3">
+            <div>
+              <span className="inline-flex items-center px-3.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-extrabold text-xs uppercase tracking-wider">
+                Fase 2
+              </span>
+            </div>
+            <h3 className="font-bold text-slate-800 text-base">Duelos Eliminatorios</h3>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Enfrentamientos directos 1 vs 1 en pizarras con proyector. Rondas de 16 y cuartos de final con 10 minutos por integral al mejor de 5 duelos.
+            </p>
           </div>
-          <h3 className="font-bold text-slate-800 text-base">Duelos Eliminatorios</h3>
-          <p className="text-xs text-slate-500 leading-relaxed">
-            Enfrentamientos directos 1 vs 1 en pizarras con proyector. Rondas de 16 y cuartos de final con 10 minutos por integral al mejor de 5 duelos.
-          </p>
-          <div className="pt-2 text-[11px] font-semibold text-amber-800 flex items-center gap-1.5">
+          <div className="pt-2 text-[11px] font-semibold text-amber-800 flex items-center gap-1.5 border-t border-slate-100">
             <CheckCircle2 className="w-3.5 h-3.5" /> Nivel de Ejercicios: Medio
           </div>
         </div>
 
         {/* Fase 3 */}
-        <div className="bg-white rounded-3xl p-6 border border-purple-100 shadow-fcnm hover:shadow-fcnm-hover transition-all space-y-3">
-          <div className="w-10 h-10 rounded-2xl bg-purple-50 text-fcnm border border-purple-200 flex items-center justify-center font-bold text-sm">
-            Fase 3
+        <div className="bg-white rounded-3xl p-6 border border-purple-100 shadow-fcnm hover:shadow-fcnm-hover transition-all space-y-3 flex flex-col justify-between">
+          <div className="space-y-3">
+            <div>
+              <span className="inline-flex items-center px-3.5 py-1 rounded-full bg-purple-50 text-fcnm border border-purple-200 font-extrabold text-xs uppercase tracking-wider">
+                Fase 3
+              </span>
+            </div>
+            <h3 className="font-bold text-slate-800 text-base">Semifinales y Gran Final</h3>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Realizadas en el Auditorio Pedro Franco Dávila. Integrales de alta complejidad con 5 minutos por problema ante jurado y público.
+            </p>
           </div>
-          <h3 className="font-bold text-slate-800 text-base">Semifinales y Gran Final</h3>
-          <p className="text-xs text-slate-500 leading-relaxed">
-            Realizadas en el Auditorio Pedro Franco Dávila. Integrales de alta complejidad con 5 minutos por problema ante jurado y público.
-          </p>
-          <div className="pt-2 text-[11px] font-semibold text-fcnm flex items-center gap-1.5">
+          <div className="pt-2 text-[11px] font-semibold text-fcnm flex items-center gap-1.5 border-t border-slate-100">
             <CheckCircle2 className="w-3.5 h-3.5" /> Nivel de Ejercicios: Difícil
           </div>
         </div>

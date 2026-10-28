@@ -1,10 +1,8 @@
 import React from 'react';
 import { UserProfile } from '../types';
 import {
-  Database,
   PlusCircle,
   BookOpen,
-  SlidersHorizontal,
   Users,
   LogOut,
   LogIn,
@@ -14,11 +12,9 @@ interface NavbarProps {
   currentTab: 'list' | 'editor' | 'users';
   onSelectTab: (tab: 'list' | 'editor' | 'users') => void;
   user: UserProfile | null;
-  onOpenConfig: () => void;
   onOpenLogin: () => void;
   onOpenRegister: () => void;
   onSignOut: () => void;
-  isSupabaseConnected: boolean;
   totalIntegralsCount: number;
 }
 
@@ -26,11 +22,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   currentTab,
   onSelectTab,
   user,
-  onOpenConfig,
   onOpenLogin,
   onOpenRegister,
   onSignOut,
-  isSupabaseConnected,
   totalIntegralsCount,
 }) => {
   return (
@@ -45,17 +39,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span className="text-purple-300/80 hidden sm:inline">AEFIEC &amp; IEEE-HKN Nu Zeta</span>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onOpenConfig}
-            className="flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-medium bg-white/10 hover:bg-white/20 text-purple-100 transition-colors"
-          >
-            <Database className="w-3 h-3 text-espol-gold" />
-            <span className="hidden sm:inline">
-              {isSupabaseConnected ? 'Supabase Conectado' : 'Modo Demo / Local'}
-            </span>
-            <SlidersHorizontal className="w-2.5 h-2.5 opacity-70" />
-          </button>
+        <div className="text-[11px] text-purple-300 font-medium">
+          Edición 2026
         </div>
       </div>
 

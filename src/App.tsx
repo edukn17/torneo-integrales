@@ -7,7 +7,6 @@ import { IntegralList } from './components/IntegralList';
 import { IntegralEditor } from './components/IntegralEditor';
 import { UserManagement } from './components/UserManagement';
 import { AuthModal } from './components/AuthModal';
-import { SupabaseGuideModal } from './components/SupabaseGuideModal';
 import confetti from 'canvas-confetti';
 import { Calendar, Award, Building2 } from 'lucide-react';
 
@@ -17,10 +16,8 @@ export function App() {
   const [loading, setLoading] = useState(false);
   const [currentTab, setCurrentTab] = useState<'list' | 'editor' | 'users'>('list');
   const [editingIntegral, setEditingIntegral] = useState<Integral | null>(null);
-  const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authTab, setAuthTab] = useState<'login' | 'register'>('login');
-  const [isSupabaseConnected, setIsSupabaseConnected] = useState(false);
 
   // Cargar integrales según rol
   const loadIntegrals = useCallback(async (role: UserRole) => {
@@ -35,10 +32,9 @@ export function App() {
     }
   }, []);
 
-  // Verificar sesión y conexión inicial
+  // Verificar sesión al cargar
   useEffect(() => {
     const init = async () => {
-      setIsSupabaseConnected(IntegralService.isSupabaseConfigured());
       const currentUser = await AuthService.getCurrentUser();
       setUser(currentUser);
       if (currentUser) {
@@ -101,7 +97,6 @@ export function App() {
           setCurrentTab(tab);
         }}
         user={user}
-        onOpenConfig={() => setIsConfigOpen(true)}
         onOpenLogin={() => {
           setAuthTab('login');
           setIsAuthOpen(true);
@@ -111,13 +106,12 @@ export function App() {
           setIsAuthOpen(true);
         }}
         onSignOut={handleSignOut}
-        isSupabaseConnected={isSupabaseConnected}
         totalIntegralsCount={integrals.length}
       />
 
       {/* Contenido Principal */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fadeIn">
-        {/* Si el usuario no ha iniciado sesión, mostrar la página de bienvenida y registro */}
+        {/* Si el usuario no ha iniciado sesión, mostrar la landing informativa */}
         {!user ? (
           <LandingHero
             onOpenLogin={() => {
@@ -204,18 +198,6 @@ export function App() {
         initialTab={authTab}
         onClose={() => setIsAuthOpen(false)}
         onAuthSuccess={handleAuthSuccess}
-      />
-
-      {/* Modal Guía Supabase */}
-      <SupabaseGuideModal
-        isOpen={isConfigOpen}
-        onClose={() => setIsConfigOpen(false)}
-        onCredentialsUpdated={() => {
-          setIsSupabaseConnected(IntegralService.isSupabaseConfigured());
-          if (user) {
-            loadIntegrals(user.role);
-          }
-        }}
       />
     </div>
   );
