@@ -59,7 +59,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) =
     return users.filter(
       (u) =>
         u.full_name.toLowerCase().includes(q) ||
-        u.email.toLowerCase().includes(q)
+        u.email.toLowerCase().includes(q) ||
+        (u.matricula && u.matricula.includes(q))
     );
   }, [users, search]);
 
@@ -125,7 +126,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) =
             <Search className="w-4 h-4 absolute left-3.5 top-3 text-purple-400" />
             <input
               type="text"
-              placeholder="Buscar colaborador por nombre o correo..."
+              placeholder="Buscar por nombre, correo o matrícula..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-slate-50 hover:bg-purple-50/30 focus:bg-white border border-purple-100 focus:border-fcnm rounded-xl pl-10 pr-4 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none transition-all shadow-sm"
@@ -154,8 +155,9 @@ export const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) =
             <thead className="bg-purple-50/60 border-b border-purple-100 text-xs font-bold uppercase tracking-wider text-fcnm-deep">
               <tr>
                 <th className="py-3.5 px-6">Colaborador</th>
-                <th className="py-3.5 px-6">Correo Institucional</th>
-                <th className="py-3.5 px-6">Nivel de Acceso Asignado</th>
+                <th className="py-3.5 px-6">Matrícula</th>
+                <th className="py-3.5 px-6">Correo</th>
+                <th className="py-3.5 px-6">Nivel de Acceso</th>
                 <th className="py-3.5 px-6 text-center">Registro</th>
                 <th className="py-3.5 px-6 text-right">Estado</th>
               </tr>
@@ -193,6 +195,17 @@ export const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) =
                           <span className="text-xs text-slate-400">ID: {u.id.slice(0, 8)}...</span>
                         </div>
                       </div>
+                    </td>
+
+                    {/* Matrícula */}
+                    <td className="py-4 px-6 font-mono text-xs font-bold text-fcnm-deep whitespace-nowrap">
+                      {u.matricula ? (
+                        <span className="bg-purple-50 px-2 py-1 rounded border border-purple-200">
+                          {u.matricula}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 italic">No registrada</span>
+                      )}
                     </td>
 
                     {/* Email */}

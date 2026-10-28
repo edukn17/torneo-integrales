@@ -29,6 +29,7 @@ export interface UserProfile {
   id: string;
   email: string;
   full_name: string;
+  matricula?: string;
   role: UserRole;
   created_at?: string;
   is_demo?: boolean;

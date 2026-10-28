@@ -191,6 +191,7 @@ const INITIAL_MOCK_PROFILES: UserProfile[] = [
     id: 'user-1',
     email: 'organizador@mates-espol.edu.ec',
     full_name: 'Coordinador General MatEs',
+    matricula: '202008123',
     role: 'admin',
     created_at: '2026-10-21T09:00:00Z',
     is_demo: true,
@@ -199,6 +200,7 @@ const INITIAL_MOCK_PROFILES: UserProfile[] = [
     id: 'user-2',
     email: 'tutor.calculo@espol.edu.ec',
     full_name: 'Docente Tutor de Cálculo',
+    matricula: '201804910',
     role: 'dificil',
     created_at: '2026-10-22T10:00:00Z',
     is_demo: true,
@@ -207,6 +209,7 @@ const INITIAL_MOCK_PROFILES: UserProfile[] = [
     id: 'user-3',
     email: 'colaborador.fase2@espol.edu.ec',
     full_name: 'Comité Duelos de 16',
+    matricula: '202203115',
     role: 'medio',
     created_at: '2026-10-23T14:30:00Z',
     is_demo: true,
@@ -215,6 +218,7 @@ const INITIAL_MOCK_PROFILES: UserProfile[] = [
     id: 'user-4',
     email: 'ayudante.fase1@espol.edu.ec',
     full_name: 'Comité Clasificación Escrita',
+    matricula: '202309841',
     role: 'basico',
     created_at: '2026-10-24T16:00:00Z',
     is_demo: true,
@@ -261,6 +265,7 @@ export const AuthService = {
           id: profile.id,
           email: profile.email,
           full_name: profile.full_name || session.user.user_metadata?.full_name || 'Colaborador',
+          matricula: profile.matricula || session.user.user_metadata?.matricula || '',
           role: profile.role,
           created_at: profile.created_at,
           is_demo: false,
@@ -275,8 +280,9 @@ export const AuthService = {
     return this.getStoredProfile();
   },
 
-  async signUp(email: string, password: string, fullName: string): Promise<{ user: UserProfile | null; error: string | null }> {
+  async signUp(email: string, password: string, fullName: string, matricula: string): Promise<{ user: UserProfile | null; error: string | null }> {
     const client = getSupabaseClient();
+    const cleanMatricula = matricula.trim();
 
     if (!client) {
       // Mock signup
@@ -284,6 +290,7 @@ export const AuthService = {
         id: 'mock-user-' + Date.now(),
         email: email.trim(),
         full_name: fullName.trim() || 'Nuevo Colaborador',
+        matricula: cleanMatricula,
         role: 'basico',
         created_at: new Date().toISOString(),
         is_demo: true,
@@ -299,6 +306,7 @@ export const AuthService = {
         options: {
           data: {
             full_name: fullName.trim(),
+            matricula: cleanMatricula,
             role: 'basico',
           },
         },
@@ -313,6 +321,7 @@ export const AuthService = {
           id: data.user.id,
           email: data.user.email || email,
           full_name: fullName.trim(),
+          matricula: cleanMatricula,
           role: 'basico',
           created_at: new Date().toISOString(),
           is_demo: false,
@@ -358,6 +367,7 @@ export const AuthService = {
           id: data.user.id,
           email: data.user.email || email,
           full_name: profile?.full_name || data.user.user_metadata?.full_name || 'Colaborador',
+          matricula: profile?.matricula || data.user.user_metadata?.matricula || '',
           role: role,
           created_at: profile?.created_at,
           is_demo: false,

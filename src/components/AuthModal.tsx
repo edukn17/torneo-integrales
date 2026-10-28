@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AuthService } from '../lib/supabase';
 import { UserProfile } from '../types';
-import { X, LogIn, UserPlus, Lock, Mail, User, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { X, LogIn, UserPlus, Lock, Mail, User, AlertCircle, CheckCircle2, Hash } from 'lucide-react';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -14,6 +14,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onAuthSuc
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [matricula, setMatricula] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -24,6 +25,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onAuthSuc
     e.preventDefault();
     setErrorMsg('');
     setSuccessMsg('');
+
+    if (tab === 'register') {
+      if (!fullName.trim()) {
+        setErrorMsg('Por favor ingresa tu nombre y apellido completo.');
+        return;
+      }
+      const cleanMatricula = matricula.trim();
+      if (!cleanMatricula || !/^\d{9}$/.test(cleanMatricula)) {
+        setErrorMsg('El número de matrícula debe tener exactamente 9 dígitos numéricos (ej: 202204589).');
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
@@ -38,11 +52,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onAuthSuc
           onClose();
         }
       } else {
-        if (!fullName.trim()) {
-          setErrorMsg('Por favor ingresa tu nombre completo.');
-          return;
-        }
-        const { user, error } = await AuthService.signUp(email, password, fullName);
+        const { user, error } = await AuthService.signUp(email, password, fullName, matricula);
         if (error) {
           setErrorMsg(error);
           return;
@@ -131,22 +141,49 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onAuthSuc
           )}
 
           {tab === 'register' && (
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                Nombre y Apellidos
-              </label>
-              <div className="relative">
-                <User className="w-4 h-4 absolute left-3.5 top-3 text-purple-400" />
-                <input
-                  type="text"
-                  required
-                  placeholder="Ej: Eduardo Morales"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="w-full bg-slate-50 border border-purple-100 focus:border-fcnm rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none transition-all shadow-sm"
-                />
+            <>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                  Nombre y Apellidos
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 absolute left-3.5 top-3 text-purple-400" />
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ej: Eduardo Morales"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="w-full bg-slate-50 border border-purple-100 focus:border-fcnm rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none transition-all shadow-sm"
+                  />
+                </div>
               </div>
-            </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                  Número de Matrícula (9 dígitos)
+                </label>
+                <div className="relative">
+                  <Hash className="w-4 h-4 absolute left-3.5 top-3 text-purple-400" />
+                  <input
+                    type="text"
+                    required
+                    maxLength={9}
+                    pattern="[0-9]{9}"
+                    placeholder="Ej: 202204589"
+                    value={matricula}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '').slice(0, 9);
+                      setMatricula(val);
+                    }}
+                    className="w-full bg-slate-50 border border-purple-100 focus:border-fcnm rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none transition-all shadow-sm font-mono tracking-wider"
+                  />
+                </div>
+                <span className="text-[11px] text-slate-400 mt-1 block">
+                  Requerido para control de colaboradores (no participantes del torneo).
+                </span>
+              </div>
+            </>
           )}
 
           <div>
@@ -186,7 +223,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onAuthSuc
 
           {tab === 'register' && (
             <p className="text-[11px] text-slate-500 bg-purple-50/70 p-2.5 rounded-xl border border-purple-100">
-              ℹ Al registrarte, tu cuenta quedará habilitada inicialmente para <strong>Nivel Básico</strong>. El administrador del torneo podrá asignarte nivel Medio o Difícil.
+              ℹ Al registrarte, tu cuenta quedará habilitada para <strong>Nivel Básico</strong>. El administrador podrá asignarte nivel Medio o Difícil.
             </p>
           )}
 
