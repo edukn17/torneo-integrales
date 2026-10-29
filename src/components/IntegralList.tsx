@@ -593,6 +593,23 @@ export const IntegralList: React.FC<IntegralListProps> = ({
                       </div>
                     </div>
                   )}
+                  {/* Panel de edición para Colaboradores (si se dieron cuenta de un error antes de que se apruebe) */}
+                  {userRole !== 'admin' && integral.status === 'propuesta' && (
+                    <div className="mt-3 pt-2.5 border-t border-purple-100 flex items-center justify-between gap-2 flex-wrap bg-amber-50/70 p-2.5 rounded-xl border border-amber-200/70">
+                      <div className="flex items-center gap-1.5 text-xs text-amber-900 font-medium">
+                        <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                        <span>En espera de revisión por el administrador</span>
+                      </div>
+                      <button
+                        onClick={() => onEdit(integral)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm"
+                        title="Corregir fórmula o solución antes de la aprobación"
+                      >
+                        <Edit3 className="w-3 h-3" />
+                        <span>Editar / Corregir</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -634,7 +651,17 @@ export const IntegralList: React.FC<IntegralListProps> = ({
                       {Math.round(integral.time_limit_seconds / 60)} min
                     </td>
                     <td className="py-3 px-4 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-1">
+                      <div className="flex items-center justify-end gap-1.5">
+                        {integral.status === 'propuesta' && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-1">
+                            <Clock className="w-2.5 h-2.5" /> En Revisión
+                          </span>
+                        )}
+                        {integral.status === 'aprobada' && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                            <CheckCircle2 className="w-2.5 h-2.5" /> Aprobada
+                          </span>
+                        )}
                         <button
                           onClick={() => handleCopyLatex(integral.id, integral.latex_code)}
                           className="p-1.5 text-slate-400 hover:text-fcnm rounded"
@@ -642,13 +669,16 @@ export const IntegralList: React.FC<IntegralListProps> = ({
                         >
                           {isCopied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
                         </button>
-                        <button
-                          onClick={() => onEdit(integral)}
-                          className="p-1.5 text-slate-400 hover:text-fcnm rounded"
-                          title="Editar"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
+                        {(userRole === 'admin' || integral.status === 'propuesta') && (
+                          <button
+                            onClick={() => onEdit(integral)}
+                            className="px-2 py-1 text-amber-700 hover:text-amber-900 hover:bg-amber-50 rounded flex items-center gap-1 text-xs font-semibold"
+                            title="Editar / Corregir propuesta"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                            <span>Editar</span>
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

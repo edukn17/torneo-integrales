@@ -156,10 +156,18 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
         <div>
           <h2 className="text-xl font-bold text-fcnm-dark flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-fcnm" />
-            {initialIntegral ? 'Editar Ejercicio de Integral' : 'Subir Nueva Integral al Banco'}
+            {initialIntegral
+              ? userRole === 'admin'
+                ? 'Editar Integral'
+                : 'Corregir Propuesta de Integral'
+              : userRole === 'admin'
+              ? 'Publicar Nueva Integral en el Banco'
+              : 'Subir Nueva Integral para Revisión'}
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Ingreso y curaduría de problemas para el Torneo de Integrales MatEs.
+            {initialIntegral && userRole !== 'admin'
+              ? 'Puedes corregir cualquier detalle de tu ejercicio antes de que el administrador lo apruebe.'
+              : 'Ingreso y curaduría de problemas para el Torneo de Integrales MatEs.'}
           </p>
         </div>
         <button
@@ -427,10 +435,12 @@ export const IntegralEditor: React.FC<IntegralEditorProps> = ({
             {saving
               ? 'Guardando...'
               : initialIntegral
-              ? 'Actualizar Integral'
+              ? userRole === 'admin'
+                ? 'Guardar Cambios'
+                : 'Guardar Corrección y Reenviar'
               : userRole === 'admin'
               ? 'Guardar y Publicar en el Banco'
-              : 'Subir para Revisión'}
+              : 'Enviar para Revisión'}
           </button>
         </div>
       </form>
