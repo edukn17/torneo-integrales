@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Integral, DifficultyLevel, TournamentPhase, UserRole, ROLE_HIERARCHY } from '../types';
+import { Integral, DifficultyLevel, TournamentPhase, UserRole, ExerciseStatus, ROLE_HIERARCHY } from '../types';
 import { MathView } from './MathView';
 import {
   Sparkles,

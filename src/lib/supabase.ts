@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Integral, UserProfile, UserRole, ROLE_HIERARCHY } from '../types';
+import { Integral, UserProfile, UserRole, ExerciseStatus, ROLE_HIERARCHY } from '../types';
 import { INITIAL_INTEGRALS } from './mockData';
 
 // Configuración de Supabase
