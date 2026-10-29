@@ -157,6 +157,7 @@ export function App() {
                   <IntegralList
                     integrals={integrals}
                     userRole={user.role}
+                    currentUserId={user.id}
                     onEdit={handleEditIntegral}
                     onDelete={handleDeleteIntegral}
                     onAddNew={() => {

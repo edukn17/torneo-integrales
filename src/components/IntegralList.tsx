@@ -24,6 +24,7 @@ import {
 interface IntegralListProps {
   integrals: Integral[];
   userRole: UserRole;
+  currentUserId?: string;
   onEdit: (integral: Integral) => void;
   onDelete: (id: string) => void;
   onAddNew: () => void;
@@ -33,6 +34,7 @@ interface IntegralListProps {
 export const IntegralList: React.FC<IntegralListProps> = ({
   integrals,
   userRole,
+  currentUserId,
   onEdit,
   onDelete,
   onAddNew,
@@ -40,32 +42,53 @@ export const IntegralList: React.FC<IntegralListProps> = ({
 }) => {
   const [search, setSearch] = useState('');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('todos');
-  const [selectedStatus, setSelectedStatus] = useState<string>('todos');
+  const [activeTab, setActiveTab] = useState<'banco' | 'pendientes' | 'rechazadas'>('banco');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [revealedSolutions, setRevealedSolutions] = useState<Record<string, boolean>>({});
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const allowedLevels = ROLE_HIERARCHY[userRole];
 
-  // Filtrado jerárquico y por búsqueda
-  const filteredIntegrals = useMemo(() => {
-    return integrals.filter((item) => {
-      // 1. Restricción estricta de jerarquía por rol
-      if (!allowedLevels.includes(item.difficulty_level)) {
-        return false;
-      }
+  // 1. Integrales aprobadas (el banco oficial visible según nivel)
+  const approvedIntegrals = useMemo(() => {
+    return integrals.filter(
+      (item) => allowedLevels.includes(item.difficulty_level) && item.status === 'aprobada'
+    );
+  }, [integrals, allowedLevels]);
 
-      // 2. Filtro de dificultad seleccionado por el usuario
+  // 2. Propuestas pendientes de aprobación
+  const pendingIntegrals = useMemo(() => {
+    return integrals.filter((item) => {
+      if (!allowedLevels.includes(item.difficulty_level)) return false;
+      if (item.status !== 'propuesta') return false;
+      if (userRole === 'admin') return true;
+      return currentUserId ? item.created_by === currentUserId : true;
+    });
+  }, [integrals, allowedLevels, userRole, currentUserId]);
+
+  // 3. Integrales rechazadas
+  const rejectedIntegrals = useMemo(() => {
+    return integrals.filter((item) => {
+      if (!allowedLevels.includes(item.difficulty_level)) return false;
+      if (item.status !== 'rechazada') return false;
+      if (userRole === 'admin') return true;
+      return currentUserId ? item.created_by === currentUserId : true;
+    });
+  }, [integrals, allowedLevels, userRole, currentUserId]);
+
+  // Lista activa según pestaña
+  const activeList = useMemo(() => {
+    if (activeTab === 'banco') return approvedIntegrals;
+    if (activeTab === 'pendientes') return pendingIntegrals;
+    return rejectedIntegrals;
+  }, [activeTab, approvedIntegrals, pendingIntegrals, rejectedIntegrals]);
+
+  // Filtrado de la lista activa por dificultad y búsqueda
+  const filteredIntegrals = useMemo(() => {
+    return activeList.filter((item) => {
       if (selectedDifficulty !== 'todos' && item.difficulty_level !== selectedDifficulty) {
         return false;
       }
-
-      // 3. Filtro de estado
-      if (selectedStatus !== 'todos' && item.status !== selectedStatus) {
-        return false;
-      }
-
-      // 4. Búsqueda de texto
       if (search.trim()) {
         const query = search.toLowerCase();
         const inTitle = item.title.toLowerCase().includes(query);
@@ -75,10 +98,9 @@ export const IntegralList: React.FC<IntegralListProps> = ({
         const inAuthor = (item.created_by_name || '').toLowerCase().includes(query);
         return inTitle || inLatex || inTags || inSource || inAuthor;
       }
-
       return true;
     });
-  }, [integrals, allowedLevels, selectedDifficulty, selectedStatus, search]);
+  }, [activeList, selectedDifficulty, search]);
 
   const toggleSolution = (id: string) => {
     setRevealedSolutions((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -90,13 +112,13 @@ export const IntegralList: React.FC<IntegralListProps> = ({
     setTimeout(() => setCopiedId(null), 1800);
   };
 
-  // Contadores por fase/nivel
+  // Contadores del banco oficial por fase/nivel
   const stats = useMemo(() => {
-    const basicoCount = integrals.filter((i) => i.difficulty_level === 'basico').length;
-    const medioCount = integrals.filter((i) => i.difficulty_level === 'medio').length;
-    const dificilCount = integrals.filter((i) => i.difficulty_level === 'dificil').length;
+    const basicoCount = approvedIntegrals.filter((i) => i.difficulty_level === 'basico').length;
+    const medioCount = approvedIntegrals.filter((i) => i.difficulty_level === 'medio').length;
+    const dificilCount = approvedIntegrals.filter((i) => i.difficulty_level === 'dificil').length;
     return { basicoCount, medioCount, dificilCount };
-  }, [integrals]);
+  }, [approvedIntegrals]);
 
   return (
     <div className="space-y-6">
@@ -223,6 +245,86 @@ export const IntegralList: React.FC<IntegralListProps> = ({
         </div>
       </div>
 
+      {/* Selector Principal de Flujo: Banco Oficial vs Cola de Aprobación */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 sm:p-4 rounded-2xl border border-purple-100 shadow-fcnm">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+          <button
+            onClick={() => setActiveTab('banco')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
+              activeTab === 'banco'
+                ? 'bg-fcnm text-white shadow-md shadow-fcnm/30'
+                : 'text-slate-600 hover:text-fcnm hover:bg-purple-50'
+            }`}
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            <span>Banco Oficial (Publicadas)</span>
+            <span
+              className={`text-xs px-2 py-0.5 rounded-full font-bold ${
+                activeTab === 'banco' ? 'bg-white/20 text-white' : 'bg-purple-100 text-fcnm'
+              }`}
+            >
+              {approvedIntegrals.length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('pendientes')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
+              activeTab === 'pendientes'
+                ? 'bg-amber-500 text-white shadow-md shadow-amber-500/30'
+                : 'text-slate-600 hover:text-amber-800 hover:bg-amber-50'
+            }`}
+          >
+            <Clock className="w-4 h-4" />
+            <span>
+              {userRole === 'admin' ? 'Pendientes de Aprobación' : 'Mis Propuestas en Revisión'}
+            </span>
+            <span
+              className={`text-xs px-2 py-0.5 rounded-full font-bold ${
+                activeTab === 'pendientes'
+                  ? 'bg-white/20 text-white'
+                  : pendingIntegrals.length > 0
+                  ? 'bg-amber-500 text-white animate-pulse'
+                  : 'bg-amber-100 text-amber-800'
+              }`}
+            >
+              {pendingIntegrals.length}
+            </span>
+          </button>
+
+          {rejectedIntegrals.length > 0 && (
+            <button
+              onClick={() => setActiveTab('rechazadas')}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
+                activeTab === 'rechazadas'
+                  ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30'
+                  : 'text-slate-600 hover:text-rose-700 hover:bg-rose-50'
+              }`}
+            >
+              <XCircle className="w-4 h-4" />
+              <span>Rechazadas</span>
+              <span
+                className={`text-xs px-2 py-0.5 rounded-full font-bold ${
+                  activeTab === 'rechazadas'
+                    ? 'bg-white/20 text-white'
+                    : 'bg-rose-100 text-rose-800'
+                }`}
+              >
+                {rejectedIntegrals.length}
+              </span>
+            </button>
+          )}
+        </div>
+
+        <button
+          onClick={onAddNew}
+          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-fcnm hover:bg-fcnm-hover text-white text-xs sm:text-sm font-bold rounded-xl shadow-md transition-all whitespace-nowrap"
+        >
+          <PlusCircle className="w-4 h-4" />
+          <span>{userRole === 'admin' ? 'Crear Integral' : 'Enviar para Revisión'}</span>
+        </button>
+      </div>
+
       {/* Barra de Filtros, Búsqueda y Modos de Vista */}
       <div className="bg-white rounded-2xl p-4 sm:p-5 border border-purple-100 shadow-fcnm space-y-4">
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
@@ -322,71 +424,43 @@ export const IntegralList: React.FC<IntegralListProps> = ({
             </button>
           </div>
         </div>
-
-        {/* Filtro secundario de Estado de Aprobación */}
-        <div className="flex items-center gap-1.5 pt-3 border-t border-purple-100 flex-wrap">
-          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mr-1">
-            Estado:
-          </span>
-          <button
-            onClick={() => setSelectedStatus('todos')}
-            className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-              selectedStatus === 'todos'
-                ? 'bg-purple-100 text-fcnm font-bold'
-                : 'text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            Todas ({integrals.length})
-          </button>
-          <button
-            onClick={() => setSelectedStatus('aprobada')}
-            className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
-              selectedStatus === 'aprobada'
-                ? 'bg-emerald-100 text-emerald-800 font-bold'
-                : 'text-slate-500 hover:text-emerald-700'
-            }`}
-          >
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Aprobadas (
-            {integrals.filter((i) => i.status === 'aprobada').length})
-          </button>
-          <button
-            onClick={() => setSelectedStatus('propuesta')}
-            className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
-              selectedStatus === 'propuesta'
-                ? 'bg-amber-100 text-amber-900 font-bold'
-                : 'text-slate-500 hover:text-amber-700'
-            }`}
-          >
-            <Clock className="w-3.5 h-3.5 text-amber-600" /> En Revisión (
-            {integrals.filter((i) => i.status === 'propuesta').length})
-          </button>
-          <button
-            onClick={() => setSelectedStatus('rechazada')}
-            className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
-              selectedStatus === 'rechazada'
-                ? 'bg-rose-100 text-rose-800 font-bold'
-                : 'text-slate-500 hover:text-rose-700'
-            }`}
-          >
-            <XCircle className="w-3.5 h-3.5 text-rose-600" /> Rechazadas (
-            {integrals.filter((i) => i.status === 'rechazada').length})
-          </button>
-        </div>
       </div>
 
       {/* Grid de Ejercicios */}
       {filteredIntegrals.length === 0 ? (
         <div className="bg-white border-2 border-dashed border-purple-200 rounded-3xl p-12 text-center shadow-sm">
-          <BookOpen className="w-12 h-12 text-purple-300 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-slate-700">El banco está listo para recibir ejercicios</h3>
+          {activeTab === 'pendientes' ? (
+            <Clock className="w-12 h-12 text-amber-300 mx-auto mb-3" />
+          ) : activeTab === 'rechazadas' ? (
+            <XCircle className="w-12 h-12 text-rose-300 mx-auto mb-3" />
+          ) : (
+            <BookOpen className="w-12 h-12 text-purple-300 mx-auto mb-3" />
+          )}
+
+          <h3 className="text-base font-bold text-slate-700">
+            {activeTab === 'pendientes'
+              ? userRole === 'admin'
+                ? 'No hay propuestas pendientes de revisión'
+                : 'No tienes propuestas pendientes de revisión'
+              : activeTab === 'rechazadas'
+              ? 'No hay integrales rechazadas en este nivel'
+              : 'Aún no hay integrales aprobadas en este nivel'}
+          </h3>
+
           <p className="text-xs text-slate-500 max-w-md mx-auto mt-1">
-            Aún no hay integrales registradas en este nivel o filtro. Sé el primero en subir un ejercicio para la fase del torneo.
+            {activeTab === 'pendientes'
+              ? 'Cuando un colaborador proponga una nueva integral, aparecerá aquí para su evaluación y aprobación.'
+              : activeTab === 'banco'
+              ? 'Las integrales propuestas por los colaboradores se publicarán aquí automáticamente cuando el administrador las apruebe.'
+              : 'Los ejercicios rechazados se archivarán aquí para referencia técnica.'}
           </p>
+
           <button
             onClick={onAddNew}
             className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-fcnm hover:bg-fcnm-hover text-white text-xs font-bold rounded-xl shadow-md transition-all"
           >
-            <PlusCircle className="w-4 h-4" /> Subir una integral
+            <PlusCircle className="w-4 h-4" />{' '}
+            {userRole === 'admin' ? 'Subir una integral' : 'Enviar una integral para revisión'}
           </button>
         </div>
       ) : viewMode === 'grid' ? (
@@ -561,31 +635,40 @@ export const IntegralList: React.FC<IntegralListProps> = ({
                   {/* Panel de Aprobación para Administradores */}
                   {userRole === 'admin' && onUpdateStatus && (
                     <div className="mt-3 pt-2.5 border-t border-purple-100 flex items-center justify-between gap-2 flex-wrap bg-purple-50/50 p-2.5 rounded-xl">
-                      <span className="text-[11px] font-bold text-slate-700">Decisión Admin:</span>
-                      <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] font-bold text-slate-700">Acción de Administrador:</span>
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         {integral.status !== 'aprobada' && (
                           <button
                             onClick={() => onUpdateStatus(integral.id, 'aprobada')}
-                            className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition-all flex items-center gap-1"
-                            title="Aprobar esta integral para el torneo"
+                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition-all flex items-center gap-1.5"
+                            title="Aprobar e incorporar al banco oficial del torneo"
                           >
-                            <CheckCircle2 className="w-3.5 h-3.5" /> Aprobar
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Aprobar y Publicar
                           </button>
                         )}
                         {integral.status !== 'rechazada' && (
                           <button
                             onClick={() => onUpdateStatus(integral.id, 'rechazada')}
-                            className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold rounded-lg transition-all flex items-center gap-1"
+                            className="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold rounded-lg transition-all flex items-center gap-1"
                             title="Rechazar esta integral"
                           >
                             <XCircle className="w-3.5 h-3.5" /> Rechazar
                           </button>
                         )}
-                        {integral.status !== 'propuesta' && (
+                        {integral.status === 'aprobada' && (
                           <button
                             onClick={() => onUpdateStatus(integral.id, 'propuesta')}
-                            className="text-[11px] text-slate-400 hover:text-slate-600 underline ml-1"
-                            title="Volver a poner en revisión"
+                            className="text-[11px] text-amber-800 hover:text-amber-900 underline font-semibold ml-1"
+                            title="Quitar de banco oficial y devolver a pendientes de revisión"
+                          >
+                            Despublicar / Mover a Revisión
+                          </button>
+                        )}
+                        {integral.status === 'rechazada' && (
+                          <button
+                            onClick={() => onUpdateStatus(integral.id, 'propuesta')}
+                            className="text-[11px] text-slate-500 hover:text-slate-800 underline ml-1"
+                            title="Reabrir propuesta"
                           >
                             Reabrir
                           </button>
